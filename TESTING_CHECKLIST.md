@@ -1,78 +1,56 @@
 # Testing Checklist
 
-## Automated repository checks
+## Repository validation
 
-- [ ] `npm ci` completes from the committed lockfile
-- [ ] `npm run validate:source` passes
-- [ ] `npm test` passes
-- [ ] `npm run check` passes
-- [ ] `npm run build` passes
-- [ ] Built-output audit passes with `PUBLIC_SITE_READY=false`
-- [ ] `npm run netlify:smoke` passes
-- [ ] GitHub Actions completes successfully
+- [ ] `npm ci --no-audit --no-fund`
+- [ ] `npm run validate:source`
+- [ ] `npm test`, including staging Edge gate tests
+- [ ] `npm run check`
+- [ ] `PUBLIC_FORMS_ENABLED=false npm run build`
+- [ ] Built-output audit confirms noindex, robots, links, accessibility associations, and disabled forms
+- [ ] `npm run netlify:smoke`
+- [ ] Standard GitHub Actions workflow succeeds
 
-## Route and navigation checks
+## Staging deployment workflow
 
-- [ ] All 18 required static routes render
-- [ ] Dynamic article routes render for approved/test content
-- [ ] Desktop navigation, mobile menu, footer, breadcrumbs, and calls to action work
-- [ ] Legal links, form links, article links, and resource links resolve
-- [ ] Custom 404 response and navigation work
-- [ ] No staging page is indexable
+- [ ] GitHub `staging` environment exists and is branch-restricted
+- [ ] Required environment secrets exist
+- [ ] Wrong branch is rejected
+- [ ] Wrong/missing site ID is rejected
+- [ ] Draft deploy produces a deploy ID and immutable URL
+- [ ] Server-side access gate returns 401 without credentials
+- [ ] Authorized request returns site content
+- [ ] Missing gate configuration fails closed with 503
+- [ ] GitHub summary contains no credentials
+- [ ] `npm run postdeploy:smoke` passes
 
-## Forms and integrations
+## Static route and browser review
 
-- [ ] Recruitment, consultation, and contact field validation
-- [ ] Missing, failed, mismatched-action, reused, and invalid-host Turnstile behavior
-- [ ] Origin and unsupported-method rejection
-- [ ] Honeypot and platform rate-limit response
-- [ ] Safe loading, success, failure, and screen-reader status states
-- [ ] PDF, DOC, DOCX, invalid signature, oversize, and mismatched MIME tests
-- [ ] Private test upload and expiring protected link
-- [ ] No résumé email attachments
-- [ ] Resend delivery success and failure/cleanup path
-- [ ] AWS S3 lifecycle rule or approved R2 lifecycle process
-- [ ] All synthetic test objects and emails deleted after review
+- [ ] Required pages and `/admin/` render
+- [ ] Visible article routes render when approved/test content exists
+- [ ] Navigation, mobile menu, footer, breadcrumbs, CTAs, legal links, and resource links work
+- [ ] Custom 404 works
+- [ ] Draft PDF downloads over HTTPS and remains noindex
+- [ ] Small mobile through large desktop layouts pass
+- [ ] Keyboard, focus, headings, labels, status messages, contrast, zoom, reduced motion, and touch targets pass
+- [ ] Security headers and CSP pass
+- [ ] Lighthouse or equivalent representative-route review passes material thresholds
+
+## Forms and Milestone B integrations
+
+- [ ] Milestone A forms show disabled notice and cannot submit
+- [ ] Turnstile Siteverify cases pass
+- [ ] Origin, honeypot, method, body-size, schema, and rate-limit rejection pass
+- [ ] Recruitment, consultation, and contact success/failure states pass with synthetic data
+- [ ] Valid and invalid résumé cases pass
+- [ ] S3 remains private and signed-link expiry works
+- [ ] Résumés are never email attachments
+- [ ] Resend success/failure and storage cleanup pass
+- [ ] No personal data remains after testing
 
 ## CMS
 
-- [ ] GitHub OAuth login on staging
-- [ ] Correct repository and main publishing branch
-- [ ] Editorial workflow creates auditable branches/pull requests
-- [ ] Articles, testimonials, leaders, team stories, events, achievements, resources, homepage, and FAQs edit correctly
-- [ ] Draft and approved content behavior
-- [ ] Public media paths and upload permissions
-- [ ] No confidential data stored in CMS
-
-## Accessibility
-
-- [ ] Keyboard-only navigation and skip link
-- [ ] Mobile menu focus behavior and Escape handling
-- [ ] Visible focus indicators and adequate touch targets
-- [ ] Logical headings and landmarks
-- [ ] Labels, descriptions, error association, and status announcements
-- [ ] Color contrast and 200% zoom
-- [ ] Reduced-motion behavior
-- [ ] Image alternative text
-- [ ] Automated accessibility scan of representative routes
-
-## SEO, consent, and performance
-
-- [ ] Unique titles and meta descriptions
-- [ ] Canonical URLs and Open Graph metadata
-- [ ] Structured data contains verified claims only
-- [ ] Staging robots disallows all and advertises no sitemap
-- [ ] Production sitemap/robots tested only after approval
-- [ ] Analytics and Meta scripts absent before consent
-- [ ] Consent persistence, update, and withdrawal
-- [ ] Missing tracking IDs cause no browser errors
-- [ ] Asset sizes, image loading, layout stability, and hydration reviewed
-
-## Security and repository hygiene
-
-- [ ] No secrets, `.env`, private media, applicant data, or test uploads in Git
-- [ ] Security headers and CSP reviewed on staging
-- [ ] Authorized recipient and mailbox access reviewed
-- [ ] Storage credentials use least privilege
-- [ ] Signed-link expiry and retention deletion verified
-- [ ] Logs contain no submitted personal data
+- [ ] GitHub OAuth authorized login and unauthorized denial
+- [ ] Draft, editorial branch/PR, preview, publish, render, removal, logout, expiry, and callback-failure cases
+- [ ] No OAuth secret in public source
+- [ ] No confidential content stored in CMS

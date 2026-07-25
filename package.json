@@ -15,7 +15,8 @@
     "validate": "npm run validate:source && npm run test && npm run build",
     "cms:local": "npx decap-server",
     "netlify:dev": "netlify dev",
-    "netlify:smoke": "bash scripts/netlify_smoke.sh"
+    "netlify:smoke": "bash scripts/netlify_smoke.sh",
+    "postdeploy:smoke": "node scripts/post_deploy_smoke.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.6.0",

@@ -1,40 +1,26 @@
 # GitHub Workflow
 
-## Branch model
+## Standard validation
 
-```text
-main
--> chore/technical-validation-and-staging
--> logical commits
--> draft pull request
--> automated validation
--> review and content/compliance follow-up
-```
+`.github/workflows/validate.yml` runs on pushes to `main`, `chore/**`, `feat/**`, and `fix/**`, and on pull requests into `main`. It installs from the committed lockfile and runs source validation, unit tests, Astro/TypeScript checks, the controlled build, built-output audit, and Netlify local smoke test.
 
-Do not perform major validation work directly on `main`. Do not force-push or merge without explicit authorization.
+## Staging deployment
 
-## Commit guidance
+`.github/workflows/deploy-staging.yml` is manual and requires the protected `staging` environment. It refuses to deploy any branch except `chore/technical-validation-and-staging` and verifies the existing Netlify site ID.
 
-Use focused messages such as:
+The workflow:
 
-- `chore: initialize Shane Perez website project`
-- `fix: resolve Astro build and content validation errors`
-- `security: harden public forms and resume upload handling`
-- `test: add locked automated project validation`
-- `docs: update deployment and environment setup`
+1. Repeats validation because deployment follows a new branch commit.
+2. Builds with indexing, draft content, profile claims, forms, analytics, Meta Pixel, and Turnstile disabled.
+3. Synchronizes safe staging values and the password hash to Netlify.
+4. Deploys with the pinned Netlify CLI in `package-lock.json`.
+5. Captures the deploy ID and URL.
+6. Runs authenticated post-deployment smoke tests.
+7. Writes a non-secret GitHub Actions summary and uploads deployment metadata.
 
-## Pull-request requirements
+The workflow supports `draft` and `staging-primary`. It does not configure a final domain, set `PUBLIC_SITE_READY=true`, merge PR #1, or enable live intake.
 
-The pull request should include:
 
-- Scope and architecture confirmation
-- File and security changes
-- Actual test and build results
-- GitHub Actions result
-- Staging status
-- Pending credentials, content, and approvals
-- Confirmation that production was not merged or deployed
+## Staging deployment trigger
 
-## Public-repository rules
-
-Never commit credentials, real environment files, résumés, submissions, private contact data, identity documents, private compliance material, or unapproved photographs.
+`.github/workflows/deploy-staging.yml` runs on pushes to `chore/technical-validation-and-staging` and supports manual `workflow_dispatch`. The push trigger is necessary while the deployment workflow exists only on the unmerged working branch. The job is still restricted to the approved repository and exact branch and uses the protected `staging` environment.

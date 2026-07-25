@@ -10,6 +10,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
 READY = os.environ.get("PUBLIC_SITE_READY", "false").lower() == "true"
+FORMS_ENABLED = os.environ.get("PUBLIC_FORMS_ENABLED", "false").lower() == "true"
 errors: list[str] = []
 warnings: list[str] = []
 
@@ -94,6 +95,12 @@ placeholder_patterns = [
 ]
 
 seen_titles: dict[str, str] = {}
+
+form_routes = {
+    "/recruitment-application/",
+    "/book-consultation/",
+    "/contact/",
+}
 for html_file in html_files:
     text = html_file.read_text(encoding="utf-8")
     parser = AuditParser()
@@ -110,6 +117,11 @@ for html_file in html_files:
         errors.append(f"{route}: {parser.images_without_alt} image(s) missing alt attributes")
     if not READY and not parser.noindex:
         errors.append(f"{route}: staging build is missing noindex")
+    if route in form_routes and not FORMS_ENABLED:
+        if "temporarily disabled in the technical staging environment" not in text:
+            errors.append(f"{route}: disabled staging form notice is missing")
+        if not re.search(r"<fieldset[^>]*disabled", text, re.I):
+            errors.append(f"{route}: staging form controls are not disabled")
 
     title_match = re.search(r"<title>(.*?)</title>", text, re.I | re.S)
     if title_match:
@@ -155,7 +167,7 @@ for asset in DIST.rglob("*"):
     if asset.suffix in {".js", ".css"} and size > 300_000:
         warnings.append(f"Large asset: {asset.relative_to(DIST)} is {size / 1024:.1f} KiB")
 
-print(f"Audited {len(html_files)} HTML files. Site ready: {READY}.")
+print(f"Audited {len(html_files)} HTML files. Site ready: {READY}. Forms enabled: {FORMS_ENABLED}.")
 for warning in warnings:
     print(f"WARNING: {warning}")
 if errors:

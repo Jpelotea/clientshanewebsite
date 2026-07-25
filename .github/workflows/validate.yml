@@ -57,6 +57,7 @@ jobs:
         env:
           PUBLIC_SITE_READY: 'false'
           PUBLIC_SHOW_DRAFT_CONTENT: 'false'
+          PUBLIC_FORMS_ENABLED: 'false'
           PUBLIC_SITE_URL: 'https://shane-perez-staging.netlify.app'
         run: npm run build
 
@@ -64,6 +65,7 @@ jobs:
         env:
           PUBLIC_SITE_READY: 'false'
           PUBLIC_SHOW_DRAFT_CONTENT: 'false'
+          PUBLIC_FORMS_ENABLED: 'false'
           PUBLIC_SITE_URL: 'http://localhost:8888'
         run: npm run netlify:smoke
 

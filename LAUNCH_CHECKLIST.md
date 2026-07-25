@@ -1,51 +1,46 @@
 # Launch Checklist
 
+## Milestone A staging
+
+- [ ] Standard validation passes on the working branch
+- [ ] Protected `Deploy staging` workflow passes for a draft deploy
+- [ ] Actual deploy ID and immutable URL recorded
+- [ ] Server-side staging access verified
+- [ ] Indexing, draft content, profile claims, analytics, Meta Pixel, and forms remain disabled
+- [ ] Route, PDF, 404, and Function safe-failure smoke tests pass
+- [ ] Browser accessibility, responsive, consent, headers, and performance review completed
+- [ ] PR #1 remains open, draft, and unmerged
+
+## Milestone B integrations
+
+- [ ] Turnstile, S3, Resend, CMS OAuth, rate limiting, and partial failure recovery pass in isolated staging
+- [ ] Synthetic test emails, objects, CMS entries, and submissions are removed
+- [ ] Live intake remains disabled until all approval gates pass
+
 ## Content and permissions
 
-- [ ] Shane has approved every visible page and article
-- [ ] Biography, title, dates, awards, events, team size, and statistics are verified
-- [ ] Leadership profiles and testimonials have written permission
-- [ ] Photographs and event materials have publication permission
-- [ ] Public email, mobile number, social links, Messenger link, and branch address are verified
-- [ ] Draft placeholders, verification notes, and temporary social image are removed or intentionally excluded
+- [ ] Shane approves every visible page and article
+- [ ] Biography, title, dates, awards, events, figures, and statistics are verified
+- [ ] Leadership profiles, testimonials, and photographs have permission
+- [ ] Public contact channels and branch address are verified
+- [ ] Draft placeholders and temporary social image are removed or excluded
 - [ ] Final career-fit guide replaces the review draft
 
 ## Compliance and legal
 
-- [ ] Manulife references and required disclaimers are approved
-- [ ] Recruitment criteria and claims are approved
-- [ ] Financial-information and consultation wording are approved
-- [ ] Privacy Policy, Cookie Notice, Terms, disclosures, consent wording, and retention process are approved
-- [ ] Personal-site/non-corporate disclosure is visible
-- [ ] Testimonials, statistics, and structured data are approved
-
-## Accounts and security
-
-- [ ] Repository, Netlify, domain, analytics, Search Console, Meta, Turnstile, Resend, and storage are owned by Shane or an authorized organization
-- [ ] GitHub and CMS editor access uses least privilege
-- [ ] Storage bucket is private and lifecycle deletion is active
-- [ ] Sender domain and notification recipients are verified
-- [ ] Production credentials are stored only in approved secret managers
-- [ ] Incident contact and credential-rotation process are documented
-
-## Technical approval
-
-- [ ] Pull request reviewed and approved
-- [ ] Lockfile committed and GitHub Actions passing
-- [ ] Production build and all required routes pass
-- [ ] Staging end-to-end forms, upload, Turnstile, email, and rate limiting pass
-- [ ] CMS login and editorial workflow pass
-- [ ] Accessibility, responsive, SEO, consent, performance, and security reviews pass
-- [ ] Custom 404, headers, redirects, and rollback procedure pass
-- [ ] All test submissions, emails, and uploads are deleted
+- [ ] Manulife wording and disclosures approved
+- [ ] Recruitment and financial-information wording approved
+- [ ] Privacy Policy, Cookie Notice, Terms, consent, disclaimers, and retention process approved
+- [ ] Personal-site disclosure visible
+- [ ] Testimonials, statistics, and structured data approved
 
 ## Production release
 
-- [ ] Explicit authorization to deploy production is recorded
-- [ ] Final production environment values are set
-- [ ] `PUBLIC_SITE_READY=true` change is reviewed
-- [ ] Production domain and canonical URL are confirmed
-- [ ] Turnstile, origin allowlist, OAuth callback, and consent settings include the production domain
-- [ ] Sitemap and Search Console are enabled only after approval
-- [ ] Production analytics are verified after consent
-- [ ] Post-launch monitoring and technical-maintenance owner are assigned
+- [ ] Explicit production authorization recorded
+- [ ] Final production environment values set securely
+- [ ] Temporary staging gate removed
+- [ ] `PUBLIC_FORMS_ENABLED=true` only after provider tests and approvals
+- [ ] `PUBLIC_SITE_READY=true` reviewed separately
+- [ ] Production domain and canonical URL confirmed
+- [ ] Sitemap, Search Console, and consent-gated production analytics enabled only after approval
+- [ ] Monitoring, rollback, incident contact, and maintenance owner assigned

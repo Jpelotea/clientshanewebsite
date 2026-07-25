@@ -10,14 +10,17 @@
 [context.deploy-preview.environment]
   PUBLIC_SITE_READY = "false"
   PUBLIC_SHOW_DRAFT_CONTENT = "false"
+  PUBLIC_FORMS_ENABLED = "false"
 
 [context.branch-deploy.environment]
   PUBLIC_SITE_READY = "false"
   PUBLIC_SHOW_DRAFT_CONTENT = "false"
+  PUBLIC_FORMS_ENABLED = "false"
 
 [context.production.environment]
   PUBLIC_SITE_READY = "false"
   PUBLIC_SHOW_DRAFT_CONTENT = "false"
+  PUBLIC_FORMS_ENABLED = "false"
 
 [dev]
   command = "npm run dev"

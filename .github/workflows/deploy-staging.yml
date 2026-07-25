@@ -1,0 +1,212 @@
+name: Deploy staging
+
+on:
+  push:
+    branches:
+      - chore/technical-validation-and-staging
+  workflow_dispatch:
+    inputs:
+      deployment_target:
+        description: Draft creates an immutable review URL; staging-primary publishes to the dedicated staging site's .netlify.app address.
+        required: true
+        default: draft
+        type: choice
+        options:
+          - draft
+          - staging-primary
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: shane-perez-staging-deployment
+  cancel-in-progress: false
+
+env:
+  APPROVED_STAGING_BRANCH: chore/technical-validation-and-staging
+  PRIMARY_STAGING_URL: https://shane-perez-personal-brand-staging.netlify.app
+
+jobs:
+  deploy:
+    name: Validate and deploy staging
+    if: github.repository == 'Jpelotea/clientshanewebsite' && github.ref == 'refs/heads/chore/technical-validation-and-staging'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    environment:
+      name: staging
+      url: ${{ steps.deploy.outputs.deploy_url }}
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      STAGING_ACCESS_USERNAME: ${{ secrets.STAGING_ACCESS_USERNAME }}
+      STAGING_ACCESS_PASSWORD: ${{ secrets.STAGING_ACCESS_PASSWORD }}
+    steps:
+      - name: Check out exact branch commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Confirm approved branch and required secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "${APPROVED_STAGING_BRANCH}"
+          test -s package-lock.json
+          test -n "${NETLIFY_AUTH_TOKEN}"
+          test -n "${NETLIFY_SITE_ID}"
+          test -n "${STAGING_ACCESS_USERNAME}"
+          test -n "${STAGING_ACCESS_PASSWORD}"
+          test "${NETLIFY_SITE_ID}" = "dd1bcef7-8547-4492-b0d4-46bae30f8582"
+          echo "::add-mask::${STAGING_ACCESS_USERNAME}"
+          echo "::add-mask::${STAGING_ACCESS_PASSWORD}"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Install validator dependencies
+        run: python -m pip install --disable-pip-version-check --requirement requirements-dev.txt
+
+      - name: Install project dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Validate source and tests
+        run: |
+          npm run validate:source
+          npm test
+          npm run check
+
+      - name: Build controlled staging output
+        env:
+          PUBLIC_SITE_URL: ${{ env.PRIMARY_STAGING_URL }}
+          PUBLIC_SITE_READY: 'false'
+          PUBLIC_SHOW_DRAFT_CONTENT: 'false'
+          PUBLIC_PROFILE_CLAIMS_VERIFIED: 'false'
+          PUBLIC_FORMS_ENABLED: 'false'
+          PUBLIC_GOOGLE_ANALYTICS_ID: ''
+          PUBLIC_META_PIXEL_ID: ''
+          PUBLIC_TURNSTILE_SITE_KEY: ''
+        run: npm run build
+
+      - name: Confirm staging-safe output
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d dist
+          test -f dist/index.html
+          test -f dist/robots.txt
+          grep -Eiq 'noindex' dist/index.html
+          grep -Eiq 'Disallow:[[:space:]]*/' dist/robots.txt
+          ! grep -R -Eiq "<script[^>]+src=[\"'][^\"']*(googletagmanager|connect\\.facebook\\.net)" dist
+          grep -R -Fq 'temporarily disabled in the technical staging environment' dist
+
+      - name: Synchronize safe staging configuration to Netlify
+        shell: bash
+        run: |
+          set -euo pipefail
+          PASSWORD_HASH="$(printf '%s' "${STAGING_ACCESS_PASSWORD}" | sha256sum | awk '{print $1}')"
+          echo "::add-mask::${PASSWORD_HASH}"
+
+          set_public_build_value() {
+            npx --no-install netlify env:set "$1" "$2" \
+              --site "${NETLIFY_SITE_ID}" \
+              --context production deploy-preview branch-deploy \
+              --force >/dev/null
+          }
+
+          set_function_secret() {
+            npx --no-install netlify env:set "$1" "$2" \
+              --site "${NETLIFY_SITE_ID}" \
+              --context production deploy-preview branch-deploy \
+              --secret \
+              --force >/dev/null
+          }
+
+          set_public_build_value PUBLIC_SITE_URL "${PRIMARY_STAGING_URL}"
+          set_public_build_value PUBLIC_SITE_READY false
+          set_public_build_value PUBLIC_SHOW_DRAFT_CONTENT false
+          set_public_build_value PUBLIC_PROFILE_CLAIMS_VERIFIED false
+          set_public_build_value PUBLIC_FORMS_ENABLED false
+          set_function_secret STAGING_ACCESS_ENABLED true
+          set_function_secret STAGING_ACCESS_USERNAME "${STAGING_ACCESS_USERNAME}"
+          set_function_secret STAGING_ACCESS_PASSWORD_HASH "${PASSWORD_HASH}"
+
+      - name: Deploy to existing Netlify staging project
+        id: deploy
+        shell: bash
+        env:
+          DEPLOYMENT_TARGET: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target || 'draft' }}
+        run: |
+          set -euo pipefail
+          FLAGS=(--no-build --dir=dist --functions=netlify/functions --site "${NETLIFY_SITE_ID}" --json --message "GitHub Actions staging ${GITHUB_SHA}")
+          DEPLOY_CONTEXT=deploy-preview
+          if [[ "${DEPLOYMENT_TARGET}" == "staging-primary" ]]; then
+            FLAGS+=(--prod)
+            DEPLOY_CONTEXT=production
+          fi
+          FLAGS+=(--context "${DEPLOY_CONTEXT}")
+
+          npx --no-install netlify deploy "${FLAGS[@]}" > netlify-deploy.json
+
+          node <<'NODE'
+          const fs = require('node:fs');
+          const data = JSON.parse(fs.readFileSync('netlify-deploy.json', 'utf8'));
+          const deployId = data.deploy_id || data.deployId || data.id;
+          const deployUrl = data.deploy_url || data.deployUrl || data.deploy_ssl_url || data.ssl_url;
+          const primaryUrl = data.url || data.site_url || process.env.PRIMARY_STAGING_URL;
+          if (!deployId || !deployUrl) throw new Error('Netlify CLI did not return a deploy ID and deploy URL.');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `deploy_id=${deployId}\ndeploy_url=${deployUrl}\nprimary_url=${primaryUrl}\n`);
+          NODE
+
+      - name: Run authenticated post-deployment smoke tests
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
+          PRIMARY_STAGING_URL: ${{ steps.deploy.outputs.primary_url }}
+        run: npm run postdeploy:smoke
+
+      - name: Write deployment summary
+        if: always()
+        shell: bash
+        env:
+          DEPLOYMENT_TARGET: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target || 'draft' }}
+          DEPLOY_ID: ${{ steps.deploy.outputs.deploy_id }}
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
+          PRIMARY_URL: ${{ steps.deploy.outputs.primary_url }}
+        run: |
+          {
+            echo '# Shane Perez staging deployment'
+            echo
+            echo "- Repository: \`${GITHUB_REPOSITORY}\`"
+            echo "- Branch: \`${GITHUB_REF_NAME}\`"
+            echo "- Commit: \`${GITHUB_SHA}\`"
+            echo "- Target: \`${DEPLOYMENT_TARGET}\`"
+            echo "- Netlify site ID: \`${NETLIFY_SITE_ID}\`"
+            echo "- Deploy ID: \`${DEPLOY_ID:-not created}\`"
+            echo "- Deploy URL: ${DEPLOY_URL:-not created}"
+            echo "- Primary staging URL: ${PRIMARY_URL:-${PRIMARY_STAGING_URL}}"
+            echo '- Access gate: server-side Netlify Edge Function'
+            echo '- Indexing: disabled (`PUBLIC_SITE_READY=false`)'
+            echo '- Forms: disabled (`PUBLIC_FORMS_ENABLED=false`)'
+            echo '- Provider integrations: Turnstile, S3, Resend, and CMS OAuth remain separate Milestone B work.'
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Upload deployment metadata
+        if: always() && hashFiles('netlify-deploy.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: netlify-staging-deploy-metadata
+          path: netlify-deploy.json
+          retention-days: 30
+          if-no-files-found: ignore

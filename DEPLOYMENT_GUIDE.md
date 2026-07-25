@@ -1,64 +1,71 @@
 # Netlify Staging and Deployment Guide
 
-## Repository connection
+## Existing staging project
 
+- Netlify project: `shane-perez-personal-brand-staging`
+- Site ID: `dd1bcef7-8547-4492-b0d4-46bae30f8582`
+- Reserved address: `https://shane-perez-personal-brand-staging.netlify.app`
 - GitHub repository: `Jpelotea/clientshanewebsite`
-- Production branch: `main`
-- Pull requests: Netlify deploy previews when enabled
+- Working branch: `chore/technical-validation-and-staging`
 - Build command: `npm run build`
 - Publish directory: `dist`
 - Functions directory: `netlify/functions`
+- Edge Functions directory: `netlify/edge-functions`
 - Node version: 22
 
-These values are also declared in `netlify.toml`.
+Do not create another Netlify project. The reserved address is not a functioning staging URL until a successful deployment exists.
 
-## Safe initial connection
+## Primary deployment path
 
-1. Connect the GitHub repository to a Netlify site controlled by Shane or an authorized account owner.
-2. Keep the automatically assigned `*.netlify.app` hostname for staging.
-3. Add non-secret build variables, including `PUBLIC_SITE_READY=false`.
-4. Add isolated test credentials only to a trusted staging context when end-to-end form testing begins.
-5. Do not enable production indexing, a custom domain, or live applicant intake during technical review.
+The primary staging path is `.github/workflows/deploy-staging.yml` using the protected GitHub environment `staging`.
 
-`netlify.toml` keeps preview, branch, and production contexts at `PUBLIC_SITE_READY=false`. A later explicit reviewed change is required before production indexing.
+1. Configure the environment and secrets using `SECURE_CREDENTIAL_CONFIGURATION.md`.
+2. Let the push to `chore/technical-validation-and-staging` create the initial **Deploy staging** run.
+3. Approve the `staging` environment when required. If secrets were added after the first attempt, use **Re-run all jobs**.
+4. Use `draft` for the initial branch-triggered deployment. The manual `workflow_dispatch` target selector becomes available through the standard **Run workflow** UI after the workflow exists on the default branch.
+5. Review the job summary, immutable deploy URL, access challenge, and smoke-test result.
+6. Run `staging-primary` only after the draft deployment passes and the reserved staging address should be updated.
 
-## Decap CMS authentication
+The workflow uses the committed `netlify-cli` version through `npx --no-install netlify`. It does not install an unpinned global CLI.
 
-The CMS uses the GitHub backend. Configure the GitHub OAuth application and the Netlify OAuth provider for the actual Netlify site. No token is committed to the repository. Verify `/admin/`, editorial workflow, deploy previews, and approved content rendering before launch.
+## Server-side staging access
 
-## Form services
+`netlify/edge-functions/staging-access.ts` protects every staging path before content is returned. It reads:
 
-Configure, in order:
+- `STAGING_ACCESS_ENABLED`
+- `STAGING_ACCESS_USERNAME`
+- `STAGING_ACCESS_PASSWORD_HASH`
 
-1. Cloudflare Turnstile domains and keys.
-2. One private résumé-storage provider and lifecycle rule.
-3. Resend verified sending domain and authorized recipients.
-4. Allowed staging origin and Turnstile hostname.
-5. Synthetic end-to-end submissions.
-6. Deletion of all test data.
+Unauthorized requests return `401`, `WWW-Authenticate`, `Cache-Control: no-store`, and `X-Robots-Tag: noindex`. Missing gate configuration fails closed with `503`.
 
-Do not use live personal information during testing.
+## Disabled form state
 
-## Staging verification
+Milestone A builds use `PUBLIC_FORMS_ENABLED=false`. Recruitment, consultation, and contact forms remain visible for design and accessibility review, but their fieldsets and submit buttons are disabled and the pages state that no information will be submitted or stored.
 
-- Every route, legal page, and 404 behavior.
-- Mobile and desktop layout.
-- Form validation, Turnstile, rate limiting, private upload, signed link, email result, and cleanup.
-- CMS login and editorial workflow.
-- Consent withdrawal and absence of trackers before consent.
-- HTTPS, headers, redirects, and `noindex`/robots behavior.
-- Draft resource download and explicit draft labeling.
+The custom Netlify Function remains protected and must fail safely while provider credentials are absent. Netlify Forms remains disabled.
+
+## Local fallback
+
+```bash
+git clone https://github.com/Jpelotea/clientshanewebsite.git
+cd clientshanewebsite
+git checkout chore/technical-validation-and-staging
+npm ci --no-audit --no-fund
+npm run validate:source
+npm test
+npm run check
+npm run build
+npx netlify login
+npx netlify link --id dd1bcef7-8547-4492-b0d4-46bae30f8582
+npx netlify deploy --build
+```
+
+The GitHub Actions workflow is the repeatable primary path; this local process is only a fallback.
+
+## Milestone B
+
+After Milestone A deploys successfully, configure and test Turnstile, private S3, Resend, rate limiting, and Decap CMS OAuth. Do not enable live applicant intake until every provider path, partial failure, cleanup behavior, browser review, and compliance requirement passes.
 
 ## Production promotion
 
-Production requires:
-
-- All GitHub Actions and staging checks passing.
-- Shane's final content approval.
-- Required compliance/legal approval.
-- Verified contact details and publication permissions.
-- Security and privacy configuration accepted by the account owner.
-- Final resource files replacing drafts.
-- An explicit reviewed change that sets production readiness and indexing behavior.
-
-Do not deploy or promote production without explicit authorization.
+Production requires separate explicit authorization, approved content and disclosures, verified provider accounts, final domain decisions, and a reviewed change to launch controls. PR #1 must remain draft and unmerged during staging work.
