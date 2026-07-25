@@ -121,14 +121,12 @@ jobs:
 
           set_public_build_value() {
             npx --no-install netlify env:set "$1" "$2" \
-              --site "${NETLIFY_SITE_ID}" \
               --context production deploy-preview branch-deploy \
               --force >/dev/null
           }
 
           set_function_secret() {
             npx --no-install netlify env:set "$1" "$2" \
-              --site "${NETLIFY_SITE_ID}" \
               --context production deploy-preview branch-deploy \
               --secret \
               --force >/dev/null
