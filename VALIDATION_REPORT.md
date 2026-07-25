@@ -25,8 +25,8 @@ The failed temporary archive-transfer approach was removed. The project source i
 ## Connected toolchain evidence
 
 Validation workflow: **Validate website**  
-Successful run ID: `30148084009`  
-Run URL: `https://github.com/Jpelotea/clientshanewebsite/actions/runs/30148084009`
+Successful run ID: `30148295701`  
+Run URL: `https://github.com/Jpelotea/clientshanewebsite/actions/runs/30148295701`
 
 | Check | Result |
 |---|---|
@@ -42,6 +42,7 @@ Run URL: `https://github.com/Jpelotea/clientshanewebsite/actions/runs/3014808400
 | `npm run netlify:smoke` | Passed |
 | GitHub Actions | Passed |
 | Build artifact | Produced |
+| Validated source artifact | Produced |
 
 The smoke test served the production `dist` output and Netlify Function route through Netlify Dev, checked all required static routes, accepted the platform-safe 404/405 behavior for an unsupported GET form request, and confirmed that an unconfigured protected form fails safely with HTTP 503 rather than accepting data.
 
