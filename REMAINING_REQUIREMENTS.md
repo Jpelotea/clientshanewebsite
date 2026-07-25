@@ -7,9 +7,9 @@ Last updated: July 25, 2026
 - [ ] Create/configure GitHub environment `staging`
 - [ ] Restrict deployment branches to `chore/technical-validation-and-staging`
 - [ ] Add a required reviewer where supported
-- [ ] Add `NETLIFY_AUTH_TOKEN` as an environment secret
-- [ ] Add `NETLIFY_SITE_ID=dd1bcef7-8547-4492-b0d4-46bae30f8582`
-- [ ] Add unique `STAGING_ACCESS_USERNAME` and `STAGING_ACCESS_PASSWORD` secrets
+- [x] Add `NETLIFY_AUTH_TOKEN` as an environment secret
+- [x] Add `NETLIFY_SITE_ID=dd1bcef7-8547-4492-b0d4-46bae30f8582`
+- [x] Add unique `STAGING_ACCESS_USERNAME` and `STAGING_ACCESS_PASSWORD` secrets
 - [x] Standard validation run #43 passed for the staging-pipeline implementation
 - [ ] Run `Deploy staging` with target `draft`
 - [ ] Record deploy ID and immutable deploy URL
