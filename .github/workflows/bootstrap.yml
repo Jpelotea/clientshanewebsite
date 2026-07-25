@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - chore/technical-validation-and-staging
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -16,6 +20,8 @@ jobs:
     steps:
       - name: Check out working branch
         uses: actions/checkout@v4
+        with:
+          ref: chore/technical-validation-and-staging
 
       - name: Extract reviewed project
         run: |
@@ -28,4 +34,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "chore: initialize Shane Perez website project"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git push origin "HEAD:chore/technical-validation-and-staging"
