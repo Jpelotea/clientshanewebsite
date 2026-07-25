@@ -17,7 +17,7 @@ import FormEnhancement from './FormEnhancement.astro';
     <div class="field field--full"><label for="consultReason">Primary reason for the request <span class="required">*</span></label><textarea id="consultReason" name="reason" required maxlength="1600"></textarea></div>
     <div class="field field--full"><label for="consultBackground">Relevant message or background <span class="help">Optional</span></label><textarea id="consultBackground" name="background" maxlength="1800"></textarea></div>
     <div class="field field--full honeypot" aria-hidden="true"><label for="companyWebsite">Leave this field empty</label><input id="companyWebsite" name="website" tabindex="-1" autocomplete="off" /></div>
-    <div class="field field--full"><label class="checkbox"><input type="checkbox" name="dataConsent" value="yes" required /><span>I consent to the processing of my information for reviewing and responding to this request. I understand that the requested dates and times are preferences and are not automatically confirmed. <span class="required">*</span></span></label></div>
+    <div class="field field--full"><label class="checkbox" for="consultDataConsent"><input id="consultDataConsent" type="checkbox" name="dataConsent" value="yes" required /><span>I consent to the processing of my information for reviewing and responding to this request. I understand that the requested dates and times are preferences and are not automatically confirmed. <span class="required">*</span></span></label></div>
     <Turnstile />
   </div><button class="button button--primary" type="submit">Request a Consultation</button><FormStatus />
 </form><FormEnhancement />
