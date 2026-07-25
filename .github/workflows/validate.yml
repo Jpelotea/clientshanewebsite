@@ -67,6 +67,9 @@ jobs:
           PUBLIC_SITE_URL: 'http://localhost:8888'
         run: npm run netlify:smoke
 
+      - name: Create validated source archive
+        run: git archive --format=zip --output=shane-perez-website-source.zip HEAD
+
       - name: Upload validated static build
         uses: actions/upload-artifact@v4
         if: always() && hashFiles('dist/**') != ''
@@ -74,3 +77,11 @@ jobs:
           name: dist
           path: dist
           if-no-files-found: ignore
+
+      - name: Upload validated source archive
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: shane-perez-website-source
+          path: shane-perez-website-source.zip
+          if-no-files-found: error
