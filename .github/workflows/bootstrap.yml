@@ -1,12 +1,6 @@
 name: Bootstrap reviewed website project
 
 on:
-  push:
-    branches:
-      - chore/technical-validation-and-staging
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
@@ -14,7 +8,6 @@ permissions:
 
 jobs:
   bootstrap:
-    if: ${{ github.actor != 'github-actions[bot]' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -23,10 +16,13 @@ jobs:
         with:
           ref: chore/technical-validation-and-staging
 
-      - name: Extract reviewed project
+      - name: Reconstruct and extract reviewed project
         run: |
-          unzip -q -o project-bootstrap.zip -d .
-          rm -f project-bootstrap.zip .github/workflows/bootstrap.yml
+          cat bootstrap-parts/part-* > /tmp/project-bootstrap.b64
+          base64 --decode /tmp/project-bootstrap.b64 > /tmp/project-bootstrap.zip
+          echo "e83e48c80bbe8cbc08a0e26927b0ced7484d8add36ca0819a95f8466221bcdb7  /tmp/project-bootstrap.zip" | sha256sum --check --strict
+          unzip -q -o /tmp/project-bootstrap.zip -d .
+          rm -rf bootstrap-parts project-bootstrap.zip project-bootstrap.b64.* .github/workflows/bootstrap.yml
 
       - name: Commit initialized project
         run: |
