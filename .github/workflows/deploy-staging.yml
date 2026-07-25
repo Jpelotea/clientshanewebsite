@@ -149,12 +149,9 @@ jobs:
         run: |
           set -euo pipefail
           FLAGS=(--no-build --dir=dist --functions=netlify/functions --site "${NETLIFY_SITE_ID}" --json --message "GitHub Actions staging ${GITHUB_SHA}")
-          DEPLOY_CONTEXT=deploy-preview
           if [[ "${DEPLOYMENT_TARGET}" == "staging-primary" ]]; then
             FLAGS+=(--prod)
-            DEPLOY_CONTEXT=production
           fi
-          FLAGS+=(--context "${DEPLOY_CONTEXT}")
 
           npx --no-install netlify deploy "${FLAGS[@]}" > netlify-deploy.json
 
