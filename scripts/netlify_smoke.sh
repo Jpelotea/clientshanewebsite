@@ -3,6 +3,7 @@ set -euo pipefail
 
 PORT="${NETLIFY_DEV_PORT:-8888}"
 BASE_URL="http://127.0.0.1:${PORT}"
+LOCAL_ORIGIN="http://localhost:${PORT}"
 LOG_FILE="${TMPDIR:-/tmp}/shane-netlify-dev.log"
 
 cleanup() {
@@ -13,7 +14,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-PUBLIC_SITE_READY=false npx netlify dev \
+PUBLIC_SITE_READY=false ALLOWED_ORIGINS="${BASE_URL},${LOCAL_ORIGIN}" npx netlify dev \
   --offline \
   --dir dist \
   --functions netlify/functions \
@@ -56,7 +57,7 @@ fi
 
 post_status=$(curl --silent --output /tmp/forms-post.json --write-out '%{http_code}' \
   --request POST \
-  --header "Origin: ${BASE_URL}" \
+  --header "Origin: ${LOCAL_ORIGIN}" \
   --header "Accept: application/json" \
   --form "fullName=Synthetic Test" \
   "${BASE_URL}/api/forms/contact")
