@@ -1,0 +1,54 @@
+<script>
+  type ErrorMap = Record<string, string>;
+  document.querySelectorAll<HTMLFormElement>('form[data-async-form]').forEach(form => {
+    const status = form.querySelector<HTMLElement>('[data-form-status]');
+    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    const original = submit?.textContent || 'Submit';
+    const setStatus = (state: 'loading' | 'success' | 'error', message: string) => {
+      if (!status) return; status.dataset.state = state; status.textContent = message; status.focus();
+    };
+    const clearFieldErrors = () => {
+      form.querySelectorAll('[data-field-error]').forEach(node => node.remove());
+      form.querySelectorAll<HTMLElement>('[aria-invalid="true"]').forEach(field => {
+        field.removeAttribute('aria-invalid');
+        const previous = field.getAttribute('data-original-describedby');
+        if (previous) field.setAttribute('aria-describedby', previous); else field.removeAttribute('aria-describedby');
+        field.removeAttribute('data-original-describedby');
+      });
+    };
+    const showFieldErrors = (errors: ErrorMap) => {
+      let first: HTMLElement | null = null;
+      for (const [name, message] of Object.entries(errors)) {
+        const field = form.elements.namedItem(name);
+        if (!(field instanceof HTMLElement)) continue;
+        first ||= field;
+        const originalDescribedBy = field.getAttribute('aria-describedby') || '';
+        if (originalDescribedBy) field.setAttribute('data-original-describedby', originalDescribedBy);
+        const errorId = `${field.id || name}-server-error`;
+        field.setAttribute('aria-invalid', 'true');
+        field.setAttribute('aria-describedby', [originalDescribedBy, errorId].filter(Boolean).join(' '));
+        const error = document.createElement('p'); error.id = errorId; error.className = 'field-error'; error.dataset.fieldError = 'true'; error.textContent = message;
+        (field.closest('.field') || field.parentElement)?.appendChild(error);
+      }
+      first?.focus();
+    };
+    form.querySelectorAll<HTMLInputElement>('input[type="date"]').forEach(input => { input.min = new Date().toISOString().slice(0, 10); });
+    form.addEventListener('submit', async event => {
+      event.preventDefault(); clearFieldErrors(); if (!form.reportValidity()) return;
+      const resume = form.querySelector<HTMLInputElement>('input[type="file"][name="resume"]');
+      if (resume?.files?.[0] && resume.files[0].size > 4 * 1024 * 1024) { showFieldErrors({ resume: 'The résumé must be 4 MB or smaller.' }); setStatus('error', 'Review the highlighted information.'); return; }
+      setStatus('loading', 'Submitting securely…'); form.setAttribute('aria-busy', 'true');
+      if (submit) { submit.disabled = true; submit.textContent = 'Submitting…'; }
+      try {
+        const response = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
+        const result = await response.json().catch(() => ({ message: 'The server returned an unreadable response.' }));
+        if (!response.ok) { if (result.errors && typeof result.errors === 'object') showFieldErrors(result.errors as ErrorMap); throw new Error(result.message || 'Submission failed.'); }
+        form.reset(); setStatus('success', result.message || 'Thank you. Your submission was received.');
+        const eventName = form.dataset.conversionEvent;
+        if (eventName && typeof window.gtag === 'function') window.gtag('event', eventName);
+        if (eventName && typeof window.fbq === 'function') window.fbq('trackCustom', eventName);
+      } catch (error) { setStatus('error', error instanceof Error ? error.message : 'Unable to submit. Please try again later.'); }
+      finally { form.removeAttribute('aria-busy'); if (window.turnstile) window.turnstile.reset(); if (submit) { submit.disabled = false; submit.textContent = original; } }
+    });
+  });
+</script>

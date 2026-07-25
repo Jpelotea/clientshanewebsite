@@ -1,0 +1,4 @@
+---
+import ButtonLink from '@/components/global/ButtonLink.astro'; interface Props { title:string; description:string; primaryLabel:string; primaryHref:string; secondaryLabel?:string; secondaryHref?:string; } const {title,description,primaryLabel,primaryHref,secondaryLabel,secondaryHref}=Astro.props;
+---
+<section class="section section--dark"><div class="container grid grid--2" style="align-items:center"><div><span class="eyebrow" style="color:#f0d7a6">Next step</span><h2>{title}</h2><p class="lead">{description}</p></div><div class="cluster" style="justify-content:flex-end"><ButtonLink href={primaryHref} variant="light" tracking="cta_primary">{primaryLabel}</ButtonLink>{secondaryLabel&&secondaryHref&&<ButtonLink href={secondaryHref} variant="secondary" class="button--light" tracking="cta_secondary">{secondaryLabel}</ButtonLink>}</div></div></section>

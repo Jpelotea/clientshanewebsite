@@ -1,0 +1,41 @@
+{
+  "name": "shane-perez-personal-brand-website",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build && python3 scripts/audit_dist.py",
+    "preview": "astro preview",
+    "check": "astro check",
+    "lint": "astro check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "validate:source": "python3 scripts/validate_project.py",
+    "validate": "npm run validate:source && npm run test && npm run build",
+    "cms:local": "npx decap-server",
+    "netlify:dev": "netlify dev",
+    "netlify:smoke": "bash scripts/netlify_smoke.sh"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.6.0",
+    "@aws-sdk/client-s3": "^3.1000.0",
+    "@aws-sdk/s3-request-presigner": "^3.1000.0",
+    "@netlify/functions": "^4.2.0",
+    "astro": "^7.1.0",
+    "resend": "^6.9.0",
+    "zod": "^4.3.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.6",
+    "decap-server": "^3.3.1",
+    "netlify-cli": "^23.15.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0",
+    "@types/node": "^22.0.0"
+  },
+  "engines": {
+    "node": "22.x",
+    "npm": ">=10 <12"
+  }
+}

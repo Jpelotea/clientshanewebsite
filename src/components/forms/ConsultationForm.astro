@@ -1,0 +1,23 @@
+---
+import Turnstile from './Turnstile.astro';
+import FormStatus from './FormStatus.astro';
+import FormEnhancement from './FormEnhancement.astro';
+---
+<form class="form" action="/api/forms/consultation" method="post" data-async-form data-conversion-event="consultation_request_submit">
+  <div class="form-grid">
+    <div class="field"><label for="consultFullName">Full name <span class="required">*</span></label><input id="consultFullName" name="fullName" autocomplete="name" required maxlength="120" /></div>
+    <div class="field"><label for="consultEmail">Email <span class="required">*</span></label><input id="consultEmail" name="email" type="email" autocomplete="email" required maxlength="160" /></div>
+    <div class="field"><label for="consultMobile">Mobile number <span class="required">*</span></label><input id="consultMobile" name="mobile" type="tel" autocomplete="tel" required maxlength="40" /></div>
+    <div class="field"><label for="consultType">Consultation type <span class="required">*</span></label><select id="consultType" name="consultationType" required><option value="">Select</option><option>Financial Consultation — 30 minutes</option><option>Career Opportunity Discussion — 30 minutes</option><option>Leadership Opportunity Discussion — 45 minutes</option></select></div>
+    <div class="field"><label for="preferredDate">Preferred date <span class="required">*</span></label><input id="preferredDate" name="preferredDate" type="date" required /></div>
+    <div class="field"><label for="preferredTime">Preferred time <span class="required">*</span></label><input id="preferredTime" name="preferredTime" type="time" required /></div>
+    <div class="field"><label for="alternativeDate">Alternative date <span class="required">*</span></label><input id="alternativeDate" name="alternativeDate" type="date" required /></div>
+    <div class="field"><label for="alternativeTime">Alternative time <span class="required">*</span></label><input id="alternativeTime" name="alternativeTime" type="time" required /></div>
+    <div class="field"><label for="consultContactMethod">Preferred contact method <span class="required">*</span></label><select id="consultContactMethod" name="contactMethod" required><option value="">Select</option><option>Email</option><option>Mobile call</option><option>SMS</option><option>Messenger</option></select></div>
+    <div class="field field--full"><label for="consultReason">Primary reason for the request <span class="required">*</span></label><textarea id="consultReason" name="reason" required maxlength="1600"></textarea></div>
+    <div class="field field--full"><label for="consultBackground">Relevant message or background <span class="help">Optional</span></label><textarea id="consultBackground" name="background" maxlength="1800"></textarea></div>
+    <div class="field field--full honeypot" aria-hidden="true"><label for="companyWebsite">Leave this field empty</label><input id="companyWebsite" name="website" tabindex="-1" autocomplete="off" /></div>
+    <div class="field field--full"><label class="checkbox"><input type="checkbox" name="dataConsent" value="yes" required /><span>I consent to the processing of my information for reviewing and responding to this request. I understand that the requested dates and times are preferences and are not automatically confirmed. <span class="required">*</span></span></label></div>
+    <Turnstile />
+  </div><button class="button button--primary" type="submit">Request a Consultation</button><FormStatus />
+</form><FormEnhancement />

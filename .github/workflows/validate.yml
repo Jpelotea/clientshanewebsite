@@ -1,0 +1,71 @@
+name: Validate website
+
+on:
+  push:
+    branches:
+      - main
+      - 'chore/**'
+      - 'feat/**'
+      - 'fix/**'
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Require committed lockfile
+        run: test -f package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Validate source structure
+        run: npm run validate:source
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Run Astro and TypeScript checks
+        run: npm run check
+
+      - name: Build production output
+        env:
+          PUBLIC_SITE_READY: 'false'
+          PUBLIC_SHOW_DRAFT_CONTENT: 'false'
+          PUBLIC_SITE_URL: 'https://shane-perez-staging.netlify.app'
+        run: npm run build
+
+      - name: Run Netlify local smoke test
+        env:
+          PUBLIC_SITE_READY: 'false'
+          PUBLIC_SHOW_DRAFT_CONTENT: 'false'
+          PUBLIC_SITE_URL: 'http://localhost:8888'
+        run: npm run netlify:smoke
+
+      - name: Upload validated static build
+        uses: actions/upload-artifact@v4
+        if: always() && hashFiles('dist/**') != ''
+        with:
+          name: dist
+          path: dist
+          if-no-files-found: ignore

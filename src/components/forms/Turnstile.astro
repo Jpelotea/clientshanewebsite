@@ -1,0 +1,5 @@
+---
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
+---
+<div class="field field--full">{siteKey ? <div class="cf-turnstile" data-sitekey={siteKey} data-theme="light" data-action="website_form"></div> : <div class="notice notice--warning"><strong>Form protection is not configured.</strong> Add the approved Cloudflare Turnstile site key before testing or production use.</div>}</div>
+{siteKey && <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}

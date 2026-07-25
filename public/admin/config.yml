@@ -1,0 +1,169 @@
+backend:
+  name: github
+  repo: Jpelotea/clientshanewebsite
+  branch: main
+  use_graphql: true
+  preview_context: netlify/deploy-preview
+
+local_backend: true
+publish_mode: editorial_workflow
+media_folder: public/images/uploads
+public_folder: /images/uploads
+site_url: https://shane-perez.netlify.app
+display_url: https://shane-perez.netlify.app
+logo_url: /icons/favicon.svg
+
+slug:
+  encoding: ascii
+  clean_accents: true
+  sanitize_replacement: '-'
+
+collections:
+  - name: site_settings
+    label: Site Settings
+    files:
+      - name: homepage
+        label: Homepage Selected Content
+        file: src/data/homepage.json
+        format: json
+        fields:
+          - { label: Workflow Status, name: status, widget: select, options: [draft, review, approved, archived] }
+          - { label: Hero Eyebrow, name: heroEyebrow, widget: string }
+          - { label: Hero Heading, name: heroHeading, widget: string }
+          - { label: Hero Copy, name: heroCopy, widget: text }
+          - { label: Meet Shane Heading, name: meetHeading, widget: string }
+          - { label: Builder Heading, name: builderHeading, widget: string }
+          - { label: Career Heading, name: careerHeading, widget: string }
+          - { label: Final CTA Heading, name: finalCtaHeading, widget: string }
+
+      - name: faqs
+        label: Frequently Asked Questions
+        file: src/data/faqs.json
+        format: json
+        fields:
+          - label: Career FAQs
+            name: careerFaqs
+            widget: list
+            fields:
+              - { label: Question, name: question, widget: string }
+              - { label: Answer, name: answer, widget: text }
+          - label: Consultation FAQs
+            name: consultationFaqs
+            widget: list
+            fields:
+              - { label: Question, name: question, widget: string }
+              - { label: Answer, name: answer, widget: text }
+
+  - name: articles
+    label: Insights Articles
+    label_singular: Article
+    folder: src/content/articles
+    create: true
+    extension: md
+    format: frontmatter
+    slug: '{{slug}}'
+    summary: '{{title}} — {{status}}'
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Description, name: description, widget: text }
+      - { label: Category, name: category, widget: select, options: [Leadership, Career Development, Financial Education, Professional Growth] }
+      - { label: Publish Date, name: publishDate, widget: datetime, date_format: YYYY-MM-DD, time_format: false }
+      - { label: Updated Date, name: updatedDate, widget: datetime, required: false }
+      - { label: Author, name: author, widget: string, default: Shane Perez }
+      - { label: Workflow Status, name: status, widget: select, options: [draft, review, approved, archived], default: draft }
+      - { label: Featured, name: featured, widget: boolean, default: false }
+      - { label: Image, name: image, widget: image, required: false }
+      - { label: Image Alternative Text, name: imageAlt, widget: string, required: false }
+      - { label: Approval Note, name: approvalNote, widget: text, required: false }
+      - { label: Body, name: body, widget: markdown }
+
+  - name: testimonials
+    label: Testimonials and Success Stories
+    label_singular: Testimonial
+    folder: src/content/testimonials
+    create: true
+    extension: json
+    format: json
+    slug: '{{slug}}'
+    summary: '{{name}} — {{type}} — {{status}}'
+    fields:
+      - { label: Name or Approved Label, name: name, widget: string }
+      - { label: Role, name: role, widget: string }
+      - { label: Type, name: type, widget: select, options: [Financial Advisor, Leadership, Team Success, Client] }
+      - { label: Quote, name: quote, widget: text }
+      - { label: Workflow Status, name: status, widget: select, options: [draft, review, approved, archived], default: draft }
+      - { label: Written Permission Confirmed, name: permissionConfirmed, widget: boolean, default: false }
+      - { label: Photo, name: photo, widget: image, required: false }
+      - { label: Photo Alternative Text, name: photoAlt, widget: string, required: false }
+
+  - name: leaders
+    label: Leadership Profiles
+    label_singular: Leadership Profile
+    folder: src/content/leaders
+    create: true
+    extension: json
+    format: json
+    slug: '{{slug}}'
+    summary: '{{name}} — {{role}} — {{status}}'
+    fields:
+      - { label: Name, name: name, widget: string }
+      - { label: Verified Role, name: role, widget: string }
+      - { label: Summary, name: summary, widget: text }
+      - { label: Workflow Status, name: status, widget: select, options: [draft, review, approved, archived], default: draft }
+      - { label: Photo, name: photo, widget: image, required: false }
+      - { label: Photo Alternative Text, name: photoAlt, widget: string, required: false }
+      - label: Achievements
+        name: achievements
+        widget: list
+        required: false
+        field: { label: Verified Achievement, name: item, widget: string }
+
+  - name: events
+    label: Events
+    label_singular: Event
+    folder: src/content/events
+    create: true
+    extension: json
+    format: json
+    slug: '{{slug}}'
+    summary: '{{title}} — {{year}} — {{status}}'
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Location, name: location, widget: string }
+      - { label: Year, name: year, widget: number, value_type: int }
+      - { label: Summary, name: summary, widget: text }
+      - { label: Workflow Status, name: status, widget: select, options: [draft, review, approved, archived], default: draft }
+      - { label: Image, name: image, widget: image, required: false }
+      - { label: Image Alternative Text, name: imageAlt, widget: string, required: false }
+
+  - name: achievements
+    label: Achievements
+    label_singular: Achievement
+    folder: src/content/achievements
+    create: true
+    extension: json
+    format: json
+    slug: '{{slug}}'
+    summary: '{{title}} — {{yearLabel}} — {{status}}'
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Year Label, name: yearLabel, widget: string }
+      - { label: Summary, name: summary, widget: text }
+      - { label: Workflow Status, name: status, widget: select, options: [draft, review, approved, archived], default: draft }
+      - { label: Verification Required, name: verificationRequired, widget: boolean, default: true }
+
+  - name: resources
+    label: Downloadable Resources
+    label_singular: Resource
+    folder: src/content/resources
+    create: true
+    extension: json
+    format: json
+    slug: '{{slug}}'
+    summary: '{{title}} — {{status}}'
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Description, name: description, widget: text }
+      - { label: File, name: file, widget: file }
+      - { label: Workflow Status, name: status, widget: select, options: [draft, review, approved, archived], default: draft }
+      - { label: Direct Download, name: directDownload, widget: boolean, default: true }

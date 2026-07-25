@@ -1,0 +1,4 @@
+---
+interface Props { label: string; height?: string; } const { label, height } = Astro.props;
+---
+<div class="media-placeholder" style={height ? `min-height:${height}` : undefined} role="img" aria-label={label}><span>{label}</span></div>
