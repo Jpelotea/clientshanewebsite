@@ -2,22 +2,32 @@
 
 ## Current milestone
 
-**Milestone A pipeline prepared — deployment not yet executed**
+**Milestone A pipeline validated — deployment not yet executed**
 
-The GitHub Actions deployment workflow, staging-only server-side access gate, disabled-form presentation, and post-deployment smoke-test script are implemented on the working branch. An actual deploy ID and URL require the protected GitHub `staging` environment secrets and a manually approved workflow run.
+The GitHub Actions deployment workflow, staging-only server-side access gate, disabled-form presentation, and post-deployment smoke-test script are implemented on the working branch. Standard validation run #43 passed for commit `7aa4d50141586638d090942928aa78d6fd8b330e`.
 
-## Implemented checks
+An actual deploy ID and URL still require the protected GitHub `staging` environment secrets and an approved deployment workflow run.
+
+## Completed validation
+
+- Committed lockfile installation
+- Source validation
+- Unit tests, including Edge access-gate tests
+- Astro and TypeScript checks
+- Controlled production build
+- Built-output audit
+- Netlify local smoke test
+- Staging disabled-form output checks
+- `noindex` and disallow-all robots controls
+
+## Deployment workflow checks prepared
 
 The deployment workflow will verify before upload:
 
 - Exact approved branch
 - Existing Netlify site ID
 - Committed lockfile
-- Dependency installation
-- Source validation
-- Unit tests
-- Astro and TypeScript checks
-- Production build
+- Dependency installation and complete validation
 - Staging `noindex` output
 - Disallow-all robots output
 - Disabled form notices and fieldsets

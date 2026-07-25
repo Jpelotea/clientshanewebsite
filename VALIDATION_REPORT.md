@@ -6,9 +6,17 @@ Report date: July 25, 2026
 
 **Not Ready for Staging**
 
-The source, lockfile, dependency installation, unit tests, Astro and TypeScript checks, production build, built-output audit, local Netlify smoke test, and GitHub Actions validation were already passing at validated commit `f833a53d97e125a6ac5e33bf43e9e4a84adb43e7`.
+The source, lockfile, dependency installation, unit tests, Astro and TypeScript checks, production build, built-output audit, local Netlify smoke test, and GitHub Actions validation pass for the staging-pipeline implementation.
 
-This change adds the GitHub Actions staging-deployment pipeline, server-side Netlify Edge access gate, disabled-form technical-review state, edge-gate unit tests, and deployed smoke-test automation. A functioning deploy is not claimed until the `staging` environment secrets are configured and the manual deployment workflow returns a real deploy ID and tested URL.
+Latest successful validation evidence:
+
+- Commit: `7aa4d50141586638d090942928aa78d6fd8b330e`
+- Workflow: `Validate website`
+- Run number: `43`
+- Run ID: `30160467035`
+- Result: **success**
+
+The change adds the GitHub Actions staging-deployment pipeline, server-side Netlify Edge access gate, disabled-form technical-review state, Edge-gate unit tests, deployed smoke-test automation, and corrected local Netlify Dev origin handling. A functioning deploy is not claimed until the `staging` environment secrets are configured and the deployment workflow returns a real deploy ID and tested URL.
 
 ## Repository
 
@@ -21,23 +29,21 @@ This change adds the GitHub Actions staging-deployment pipeline, server-side Net
 - Production merge: not performed
 - Production deployment: not performed
 
-## New controls prepared
+## New controls validated in source and CI
 
-- Manual `Deploy staging` workflow with `draft` and `staging-primary` targets
+- Push/manual `Deploy staging` workflow with `draft` and `staging-primary` targets
 - Protected GitHub environment named `staging`
 - Branch and site-ID preflight enforcement
 - Pinned Netlify CLI from the committed lockfile
-- Netlify deployment output parsing and job summary
+- Netlify deployment-output parsing and job summary
 - Server-side HTTP Basic Authentication gate through a Netlify Edge Function
 - Fail-closed 503 behavior when gate configuration is incomplete
 - SHA-256 password hash stored on Netlify instead of plaintext
 - `PUBLIC_FORMS_ENABLED=false` controlled build state
 - Disabled form fieldsets and explicit no-submission notice
 - Post-deployment authenticated route, noindex, robots, PDF, 404, form, Function, and tracker smoke checks
-
-## Pre-deployment validation still required for this branch change
-
-A new standard GitHub Actions validation run must complete after these files are committed. The staging deployment workflow must not be run until that validation succeeds.
+- Unit tests for valid, invalid, incomplete, and disabled access-gate states
+- Netlify local smoke test with normalized localhost/127.0.0.1 origin handling
 
 ## Deployment evidence pending
 
@@ -62,10 +68,10 @@ A new standard GitHub Actions validation run must complete after these files are
 ## Known limitations
 
 - HTTP Basic Authentication is temporary staging protection and must be removed before final production.
-- A SHA-256 password hash is safer than plaintext storage on Netlify but the review password must still be long, random, unique, and transmitted only over HTTPS.
+- A SHA-256 password hash is safer than plaintext storage on Netlify, but the review password must still be long, random, unique, and transmitted only over HTTPS.
 - File-signature checks are not antivirus scanning or content disarm and reconstruction.
 - Signed résumé URLs remain bearer links until expiry.
 
 ## Decision
 
-The deployment mechanism is prepared but not yet executed. The evidence-based status remains **Not Ready for Staging** until a protected deployment exists and the Milestone A smoke tests pass.
+The deployment mechanism is implemented and its repository validation passes. The evidence-based status remains **Not Ready for Staging** until a protected deployment exists and the Milestone A post-deployment smoke tests pass.

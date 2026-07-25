@@ -10,7 +10,7 @@ Last updated: July 25, 2026
 - [ ] Add `NETLIFY_AUTH_TOKEN` as an environment secret
 - [ ] Add `NETLIFY_SITE_ID=dd1bcef7-8547-4492-b0d4-46bae30f8582`
 - [ ] Add unique `STAGING_ACCESS_USERNAME` and `STAGING_ACCESS_PASSWORD` secrets
-- [ ] Confirm the standard validation workflow passes for the staging-pipeline commit
+- [x] Standard validation run #43 passed for the staging-pipeline implementation
 - [ ] Run `Deploy staging` with target `draft`
 - [ ] Record deploy ID and immutable deploy URL
 - [ ] Confirm unauthorized 401 and authorized access

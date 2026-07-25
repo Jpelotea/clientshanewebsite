@@ -8,12 +8,12 @@ The `Deploy staging` GitHub Actions workflow deploys only the controlled branch 
 - Site ID: `dd1bcef7-8547-4492-b0d4-46bae30f8582`
 - Reserved address: `https://shane-perez-personal-brand-staging.netlify.app`
 
-The workflow is manual by design and uses the protected GitHub environment `staging`. It does not deploy the final production website or a custom domain.
+The workflow uses the protected GitHub environment `staging`. It supports an exact-branch push trigger and manual `workflow_dispatch`; it does not deploy the final production website or a custom domain.
 
 ## Deployment targets
 
 - `draft` — default; creates an immutable deploy-specific review URL.
-- `staging-primary` — publishes to the dedicated staging project's primary `.netlify.app` address. In this repository, this is still a staging deployment and keeps all launch controls disabled.
+- `staging-primary` — publishes to the dedicated staging project's primary `.netlify.app` address. In this repository, this remains a staging deployment and keeps all launch controls disabled.
 
 ## Required GitHub environment secrets
 
@@ -35,13 +35,13 @@ Configure the `staging` environment to:
 1. Allow deployments only from `chore/technical-validation-and-staging`.
 2. Require a reviewer before deployment where the GitHub plan supports it.
 3. Keep secrets unavailable to forked pull requests.
-4. Restrict the environment deployment branch to `chore/technical-validation-and-staging`. The workflow also listens for pushes to this branch so it can run before the workflow file reaches `main`.
+4. Restrict the environment deployment branch to `chore/technical-validation-and-staging`.
 
 ## Trigger a draft deployment
 
-The first branch deployment is triggered automatically by a push to `chore/technical-validation-and-staging`. Configure the `staging` environment secrets before approving that run. If the run started before the secrets were added, use **Re-run all jobs** after configuration.
+The first branch deployment is triggered automatically by a push to `chore/technical-validation-and-staging`. Configure the `staging` environment secrets before approving that run. When the run started before secrets were added, use **Re-run all jobs** after configuration.
 
-The workflow also supports **workflow_dispatch** with `draft` and `staging-primary` targets. GitHub only exposes the normal **Run workflow** button once the workflow file is available on the repository default branch; until then, use the branch-triggered run and its re-run control. PR #1 remains unmerged during this staging phase.
+The workflow also supports `workflow_dispatch` with `draft` and `staging-primary` targets. GitHub normally exposes the standard **Run workflow** button only when the workflow file exists on the default branch. Because PR #1 must remain unmerged, use the branch-triggered run and its re-run control until a separately authorized workflow-promotion decision is made.
 
 ## Workflow evidence
 

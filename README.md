@@ -2,7 +2,7 @@
 
 A controlled-review Astro website implementing the approved **Shane Perez — Builder of Builders** blueprint. It balances personal brand and leadership, recruitment and career opportunities, and financial education and consultation.
 
-> **Current status: Not Ready for Staging.** The repository validation pipeline passes. A GitHub Actions-based staging deployment workflow and server-side Netlify Edge access gate are now prepared, but no functioning deployment is claimed until the protected `staging` environment secrets are configured and the manual deployment workflow succeeds. Keep `PUBLIC_SITE_READY=false`.
+> **Current status: Not Ready for Staging.** The repository validation pipeline passes at commit `7aa4d50141586638d090942928aa78d6fd8b330e`. A GitHub Actions-based staging deployment workflow and server-side Netlify Edge access gate are prepared, but no functioning deployment is claimed until the protected `staging` environment secrets are configured and the deployment workflow succeeds. Keep `PUBLIC_SITE_READY=false`.
 
 ## Canonical repository
 
@@ -44,8 +44,8 @@ Use isolated test credentials and synthetic data only.
 
 ## GitHub Actions
 
-- `Validate website` runs repository, unit, Astro, TypeScript, build, output, and Netlify local smoke checks.
-- `Deploy staging` is a protected manual workflow. It accepts `draft` or `staging-primary`, validates the exact branch, deploys through the pinned Netlify CLI in the lockfile, and runs authenticated post-deployment smoke tests.
+- `Validate website` runs repository, unit, Astro, TypeScript, build, output, and Netlify local smoke checks. Run #43 passed for the staging-pipeline implementation.
+- `Deploy staging` supports an approved-branch push and protected manual execution. It accepts `draft` or `staging-primary`, validates the exact branch, deploys through the pinned Netlify CLI in the lockfile, and runs authenticated post-deployment smoke tests.
 
 Configuration instructions are in `STAGING_DEPLOYMENT.md` and `SECURE_CREDENTIAL_CONFIGURATION.md`.
 

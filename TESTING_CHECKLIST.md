@@ -2,14 +2,14 @@
 
 ## Repository validation
 
-- [ ] `npm ci --no-audit --no-fund`
-- [ ] `npm run validate:source`
-- [ ] `npm test`, including staging Edge gate tests
-- [ ] `npm run check`
-- [ ] `PUBLIC_FORMS_ENABLED=false npm run build`
-- [ ] Built-output audit confirms noindex, robots, links, accessibility associations, and disabled forms
-- [ ] `npm run netlify:smoke`
-- [ ] Standard GitHub Actions workflow succeeds
+- [x] `npm ci --no-audit --no-fund`
+- [x] `npm run validate:source`
+- [x] `npm test`, including staging Edge gate tests
+- [x] `npm run check`
+- [x] `PUBLIC_FORMS_ENABLED=false npm run build`
+- [x] Built-output audit confirms noindex, robots, links, accessibility associations, and disabled forms
+- [x] `npm run netlify:smoke`
+- [x] Standard GitHub Actions workflow run #43 succeeded for commit `7aa4d50141586638d090942928aa78d6fd8b330e`
 
 ## Staging deployment workflow
 
@@ -38,7 +38,7 @@
 
 ## Forms and Milestone B integrations
 
-- [ ] Milestone A forms show disabled notice and cannot submit
+- [ ] Milestone A forms show disabled notice and cannot submit on the live staging deployment
 - [ ] Turnstile Siteverify cases pass
 - [ ] Origin, honeypot, method, body-size, schema, and rate-limit rejection pass
 - [ ] Recruitment, consultation, and contact success/failure states pass with synthetic data
