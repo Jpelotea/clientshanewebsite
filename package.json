@@ -5,18 +5,22 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build && python3 scripts/audit_dist.py",
+    "build": "astro check && astro build && python3 scripts/audit_dist.py && python3 scripts/validate_pdf.py --source public/documents/financial-advisor-career-fit-guide-draft.pdf --built dist/documents/financial-advisor-career-fit-guide-draft.pdf",
     "preview": "astro preview",
     "check": "astro check",
     "lint": "astro check",
     "test": "vitest run",
     "test:watch": "vitest",
     "validate:source": "python3 scripts/validate_project.py",
-    "validate": "npm run validate:source && npm run test && npm run build",
+    "validate": "npm run validate:source && npm run verify:career-guide && npm run validate:pdf && npm run test:pdf && npm run test && npm run build",
     "cms:local": "npx decap-server",
     "netlify:dev": "netlify dev",
     "netlify:smoke": "bash scripts/netlify_smoke.sh",
-    "postdeploy:smoke": "node scripts/post_deploy_smoke.mjs"
+    "postdeploy:smoke": "node scripts/post_deploy_smoke.mjs",
+    "generate:career-guide": "python3 scripts/generate_career_guide.py",
+    "validate:pdf": "python3 scripts/validate_pdf.py --source public/documents/financial-advisor-career-fit-guide-draft.pdf",
+    "test:pdf": "python3 scripts/test_pdf_validation.py",
+    "verify:career-guide": "npm run generate:career-guide && git diff --exit-code -- public/documents/financial-advisor-career-fit-guide-draft.pdf"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.6.0",

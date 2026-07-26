@@ -74,7 +74,14 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-          cache-dependency-path: requirements-dev.txt
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install PDF system tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends ghostscript poppler-utils
 
       - name: Install validator dependencies
         run: python -m pip install --disable-pip-version-check --requirement requirements-dev.txt
@@ -85,6 +92,9 @@ jobs:
       - name: Validate source and tests
         run: |
           npm run validate:source
+          npm run verify:career-guide
+          npm run validate:pdf
+          npm run test:pdf
           npm test
           npm run check
 

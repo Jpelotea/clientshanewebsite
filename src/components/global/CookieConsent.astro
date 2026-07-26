@@ -2,17 +2,215 @@
 const gaId = import.meta.env.PUBLIC_GOOGLE_ANALYTICS_ID || '';
 const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID || '';
 ---
-<div class="cookie-banner" data-cookie-banner hidden role="dialog" aria-labelledby="cookie-title" aria-describedby="cookie-description"><h2 id="cookie-title" style="font-size:1.5rem">Privacy choices</h2><p id="cookie-description">Essential storage supports website operation. Analytics and marketing tools remain off unless you choose to allow them.</p><div class="cookie-options"><label class="checkbox" for="cookie-essential"><input id="cookie-essential" type="checkbox" checked disabled /> <span><strong>Essential</strong><br /><small>Required for security and your saved privacy choice.</small></span></label><label class="checkbox" for="cookie-analytics"><input id="cookie-analytics" type="checkbox" data-cookie-analytics /> <span><strong>Analytics</strong><br /><small>Helps measure website use through Google Analytics.</small></span></label><label class="checkbox" for="cookie-marketing"><input id="cookie-marketing" type="checkbox" data-cookie-marketing /> <span><strong>Marketing</strong><br /><small>Allows Meta Pixel conversion measurement.</small></span></label></div><div class="cluster"><button class="button button--primary" type="button" data-cookie-save>Save choices</button><button class="button button--secondary" type="button" data-cookie-reject>Essential only</button></div><p class="help">You can change or withdraw these choices at any time through Cookie settings in the footer.</p></div>
+<div class="cookie-backdrop" data-cookie-backdrop hidden>
+  <div
+    class="cookie-banner"
+    data-cookie-banner
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="cookie-title"
+    aria-describedby="cookie-description"
+  >
+    <h2 id="cookie-title" tabindex="-1" style="font-size:1.5rem">Privacy choices</h2>
+    <p id="cookie-description">Essential storage supports website operation. Analytics and marketing tools remain off unless you choose to allow them.</p>
+    <div class="cookie-options">
+      <label class="checkbox" for="cookie-essential"><input id="cookie-essential" type="checkbox" checked disabled /> <span><strong>Essential</strong><br /><small>Required for security and your saved privacy choice.</small></span></label>
+      <label class="checkbox" for="cookie-analytics"><input id="cookie-analytics" type="checkbox" data-cookie-analytics /> <span><strong>Analytics</strong><br /><small>Helps measure website use through Google Analytics.</small></span></label>
+      <label class="checkbox" for="cookie-marketing"><input id="cookie-marketing" type="checkbox" data-cookie-marketing /> <span><strong>Marketing</strong><br /><small>Allows Meta Pixel conversion measurement.</small></span></label>
+    </div>
+    <div class="cluster">
+      <button class="button button--primary" type="button" data-cookie-save>Save choices</button>
+      <button class="button button--secondary" type="button" data-cookie-reject>Essential only</button>
+    </div>
+    <p class="help">You can change or withdraw these choices at any time through Cookie settings in the footer.</p>
+  </div>
+</div>
 <script define:vars={{ gaId, metaPixelId }}>
-const key='sp-cookie-consent-v2'; const banner=document.querySelector('[data-cookie-banner]'); const analyticsInput=document.querySelector('[data-cookie-analytics]'); const marketingInput=document.querySelector('[data-cookie-marketing]'); let returnFocus=null;
-window.dataLayer=window.dataLayer||[]; window.gtag=window.gtag||function(){window.dataLayer.push(arguments);}; window.gtag('consent','default',{analytics_storage:'denied',ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',wait_for_update:500});
-function deleteAnalyticsCookies(){document.cookie.split(';').map(item=>item.trim().split('=')[0]).filter(name=>name.startsWith('_ga')).forEach(name=>{document.cookie=`${name}=; Max-Age=0; path=/; SameSite=Lax`;});}
-function loadAnalytics(){if(!gaId||document.querySelector('[data-ga-loader]'))return; const script=document.createElement('script');script.async=true;script.dataset.gaLoader='true';script.src=`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`;document.head.appendChild(script);window.gtag('js',new Date());window.gtag('config',gaId,{anonymize_ip:true});}
-function loadMeta(){if(!metaPixelId)return;if(!window.fbq){const f=window.fbq=function(){f.callMethod?f.callMethod.apply(f,arguments):f.queue.push(arguments);};f.queue=[];f.loaded=true;f.version='2.0';const script=document.createElement('script');script.async=true;script.src='https://connect.facebook.net/en_US/fbevents.js';document.head.appendChild(script);window.fbq('init',metaPixelId);window.fbq('track','PageView');}window.fbq('consent','grant');}
-function apply(choice){window.gtag('consent','update',{analytics_storage:choice.analytics?'granted':'denied',ad_storage:choice.marketing?'granted':'denied',ad_user_data:choice.marketing?'granted':'denied',ad_personalization:choice.marketing?'granted':'denied'});if(choice.analytics)loadAnalytics();else deleteAnalyticsCookies();if(choice.marketing)loadMeta();else if(window.fbq)window.fbq('consent','revoke');document.dispatchEvent(new CustomEvent('privacy-consent',{detail:choice}));}
-function readChoice(){try{const parsed=JSON.parse(localStorage.getItem(key)||'null');return parsed&&typeof parsed.analytics==='boolean'&&typeof parsed.marketing==='boolean'?parsed:null;}catch{return null;}}
-function openBanner(trigger){returnFocus=trigger||document.activeElement;const choice=readChoice()||{analytics:false,marketing:false};if(analyticsInput)analyticsInput.checked=Boolean(choice.analytics);if(marketingInput)marketingInput.checked=Boolean(choice.marketing);banner?.removeAttribute('hidden');banner?.querySelector('[data-cookie-save]')?.focus();}
-function closeBanner(){banner?.setAttribute('hidden','');if(returnFocus instanceof HTMLElement)returnFocus.focus();}
-function save(choice){localStorage.setItem(key,JSON.stringify({...choice,savedAt:new Date().toISOString()}));apply(choice);closeBanner();}
-document.querySelector('[data-cookie-save]')?.addEventListener('click',()=>save({analytics:analyticsInput?.checked===true,marketing:marketingInput?.checked===true}));document.querySelector('[data-cookie-reject]')?.addEventListener('click',()=>save({analytics:false,marketing:false}));document.querySelectorAll('[data-cookie-settings]').forEach(button=>button.addEventListener('click',()=>openBanner(button)));banner?.addEventListener('keydown',event=>{if(event.key==='Escape'&&readChoice())closeBanner();});const choice=readChoice();if(choice)apply(choice);else openBanner(null);
+  type ConsentChoice = { analytics: boolean; marketing: boolean };
+  type BackgroundState = { inert: boolean; ariaHidden: string | null };
+  type MetaPixelFunction = NonNullable<Window['fbq']>;
+
+  const key = 'sp-cookie-consent-v2';
+  const backdrop = document.querySelector<HTMLElement>('[data-cookie-backdrop]');
+  const banner = document.querySelector<HTMLElement>('[data-cookie-banner]');
+  const title = document.getElementById('cookie-title');
+  const analyticsInput = document.querySelector<HTMLInputElement>('[data-cookie-analytics]');
+  const marketingInput = document.querySelector<HTMLInputElement>('[data-cookie-marketing]');
+  const backgroundStates = new Map<HTMLElement, BackgroundState>();
+  let returnFocus: HTMLElement | null = null;
+
+  const dataLayer = window.dataLayer = window.dataLayer || [];
+  const gtag = window.gtag = window.gtag || ((...args: unknown[]) => dataLayer.push(args));
+  gtag('consent', 'default', {
+    analytics_storage: 'denied',
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    wait_for_update: 500,
+  });
+
+  function deleteAnalyticsCookies(): void {
+    document.cookie
+      .split(';')
+      .map((item) => item.trim().split('=')[0])
+      .filter((name) => name.startsWith('_ga'))
+      .forEach((name) => {
+        document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax`;
+      });
+  }
+
+  function loadAnalytics(): void {
+    if (!gaId || document.querySelector('[data-ga-loader]')) return;
+    const script = document.createElement('script');
+    script.async = true;
+    script.dataset.gaLoader = 'true';
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`;
+    document.head.appendChild(script);
+    gtag('js', new Date());
+    gtag('config', gaId, { anonymize_ip: true });
+  }
+
+  function loadMeta(): void {
+    if (!metaPixelId) return;
+    let meta = window.fbq;
+    if (!meta) {
+      const queuedMeta = ((...args: unknown[]) => {
+        if (queuedMeta.callMethod) queuedMeta.callMethod(...args);
+        else queuedMeta.queue?.push(args);
+      }) as MetaPixelFunction;
+      queuedMeta.queue = [];
+      queuedMeta.loaded = true;
+      queuedMeta.version = '2.0';
+      window.fbq = queuedMeta;
+      meta = queuedMeta;
+
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+      document.head.appendChild(script);
+      meta('init', metaPixelId);
+      meta('track', 'PageView');
+    }
+    meta('consent', 'grant');
+  }
+
+  function apply(choice: ConsentChoice): void {
+    gtag('consent', 'update', {
+      analytics_storage: choice.analytics ? 'granted' : 'denied',
+      ad_storage: choice.marketing ? 'granted' : 'denied',
+      ad_user_data: choice.marketing ? 'granted' : 'denied',
+      ad_personalization: choice.marketing ? 'granted' : 'denied',
+    });
+    if (choice.analytics) loadAnalytics(); else deleteAnalyticsCookies();
+    if (choice.marketing) loadMeta(); else window.fbq?.('consent', 'revoke');
+    document.dispatchEvent(new CustomEvent<ConsentChoice>('privacy-consent', { detail: choice }));
+  }
+
+  function readChoice(): ConsentChoice | null {
+    try {
+      const parsed: unknown = JSON.parse(localStorage.getItem(key) || 'null');
+      if (!parsed || typeof parsed !== 'object') return null;
+      const choice = parsed as Partial<ConsentChoice>;
+      return typeof choice.analytics === 'boolean' && typeof choice.marketing === 'boolean'
+        ? { analytics: choice.analytics, marketing: choice.marketing }
+        : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function setBackgroundInactive(inactive: boolean): void {
+    const background = Array.from(document.body.children).filter((element) => element !== backdrop);
+    if (inactive) {
+      for (const element of background) {
+        if (!(element instanceof HTMLElement)) continue;
+        backgroundStates.set(element, {
+          inert: element.inert,
+          ariaHidden: element.getAttribute('aria-hidden'),
+        });
+        element.inert = true;
+        element.setAttribute('aria-hidden', 'true');
+      }
+      return;
+    }
+    for (const [element, state] of backgroundStates) {
+      element.inert = state.inert;
+      if (state.ariaHidden === null) element.removeAttribute('aria-hidden');
+      else element.setAttribute('aria-hidden', state.ariaHidden);
+    }
+    backgroundStates.clear();
+  }
+
+  function focusableElements(): HTMLElement[] {
+    if (!banner) return [];
+    return Array.from(
+      banner.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'),
+    ).filter((element) => !element.hasAttribute('hidden'));
+  }
+
+  function openBanner(trigger: EventTarget | null): void {
+    returnFocus = trigger instanceof HTMLElement
+      ? trigger
+      : document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    const choice = readChoice() || { analytics: false, marketing: false };
+    if (analyticsInput) analyticsInput.checked = choice.analytics;
+    if (marketingInput) marketingInput.checked = choice.marketing;
+    backdrop?.removeAttribute('hidden');
+    document.body.classList.add('cookie-modal-open');
+    setBackgroundInactive(true);
+    requestAnimationFrame(() => title?.focus());
+  }
+
+  function closeBanner(): void {
+    backdrop?.setAttribute('hidden', '');
+    document.body.classList.remove('cookie-modal-open');
+    setBackgroundInactive(false);
+    if (returnFocus?.isConnected) returnFocus.focus();
+  }
+
+  function save(choice: ConsentChoice): void {
+    localStorage.setItem(key, JSON.stringify({ ...choice, savedAt: new Date().toISOString() }));
+    apply(choice);
+    closeBanner();
+  }
+
+  document.querySelector('[data-cookie-save]')?.addEventListener('click', () => save({
+    analytics: Boolean(analyticsInput?.checked),
+    marketing: Boolean(marketingInput?.checked),
+  }));
+  document.querySelector('[data-cookie-reject]')?.addEventListener('click', () => save({ analytics: false, marketing: false }));
+  document.querySelectorAll('[data-cookie-settings]').forEach((button) => button.addEventListener('click', () => openBanner(button)));
+
+  banner?.addEventListener('keydown', (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && readChoice()) {
+      event.preventDefault();
+      closeBanner();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    const focusable = focusableElements();
+    if (!focusable.length) {
+      event.preventDefault();
+      title?.focus();
+      return;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && (document.activeElement === first || document.activeElement === title)) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+
+  backdrop?.addEventListener('click', (event: MouseEvent) => {
+    if (event.target === backdrop && readChoice()) closeBanner();
+  });
+
+  const choice = readChoice();
+  if (choice) apply(choice); else openBanner(null);
 </script>

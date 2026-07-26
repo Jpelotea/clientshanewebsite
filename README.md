@@ -2,7 +2,7 @@
 
 A controlled-review Astro website implementing the approved **Shane Perez — Builder of Builders** blueprint. It balances personal brand and leadership, recruitment and career opportunities, and financial education and consultation.
 
-> **Current status: Not Ready for Staging.** The repository validation pipeline passes at commit `7aa4d50141586638d090942928aa78d6fd8b330e`. A GitHub Actions-based staging deployment workflow and server-side Netlify Edge access gate are prepared, but no functioning deployment is claimed until the protected `staging` environment secrets are configured and the deployment workflow succeeds. Keep `PUBLIC_SITE_READY=false`.
+> **Current status: Technical remediation in progress on draft PR #1.** The immutable staging deployment remains access-controlled and non-indexable while PDF integrity, keyboard accessibility, CSP, and admin supply-chain findings are corrected and revalidated. Keep `PUBLIC_SITE_READY=false`.
 
 ## Canonical repository
 
@@ -20,7 +20,7 @@ Do not force-push shared history, merge the draft pull request, enable indexing,
 
 - Astro static site and TypeScript
 - Netlify hosting, Functions, and a staging-only Edge Function
-- Decap CMS with GitHub backend and editorial workflow
+- Decap CMS configuration reserved for a separately approved Milestone B; the technical-staging `/admin/` route does not execute CMS code
 - Cloudflare Turnstile
 - Resend notifications
 - One private S3-compatible résumé-storage provider
@@ -31,9 +31,14 @@ Do not force-push shared history, merge the draft pull request, enable indexing,
 
 ```bash
 cp .env.example .env
-npm ci --no-audit --no-fund
 python -m pip install --requirement requirements-dev.txt
+# Debian/Ubuntu: sudo apt-get install --yes ghostscript poppler-utils
+npm ci --no-audit --no-fund
+npm run generate:career-guide
 npm run validate:source
+npm run verify:career-guide
+npm run validate:pdf
+npm run test:pdf
 npm test
 npm run check
 npm run build
@@ -44,7 +49,7 @@ Use isolated test credentials and synthetic data only.
 
 ## GitHub Actions
 
-- `Validate website` runs repository, unit, Astro, TypeScript, build, output, and Netlify local smoke checks. Run #43 passed for the staging-pipeline implementation.
+- `Validate website` runs repository, PDF structural/render/text checks, unit, Astro, TypeScript, build, output, and Netlify local smoke checks. It uploads rendered PDF evidence for review.
 - `Deploy staging` supports an approved-branch push and protected manual execution. It accepts `draft` or `staging-primary`, validates the exact branch, deploys through the pinned Netlify CLI in the lockfile, and runs authenticated post-deployment smoke tests.
 
 Configuration instructions are in `STAGING_DEPLOYMENT.md` and `SECURE_CREDENTIAL_CONFIGURATION.md`.

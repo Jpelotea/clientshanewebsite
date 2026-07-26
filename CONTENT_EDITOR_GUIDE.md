@@ -15,6 +15,10 @@ publish_mode: editorial_workflow
 
 No GitHub token or OAuth secret belongs in `config.yml`.
 
+## Technical-staging runtime status
+
+The `/admin/` route intentionally does not execute Decap CMS during the current technical-remediation phase. This removes the previous third-party `unpkg` runtime dependency without activating OAuth or publishing. When Milestone B is approved, the CMS bundle must be pinned and self-hosted (or delivered through another integrity-controlled method) before the login and editorial workflow are enabled.
+
 ## Authentication setup
 
 1. Connect the repository to the authorized Netlify site.

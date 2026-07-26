@@ -4,12 +4,15 @@
 
 - [x] `npm ci --no-audit --no-fund`
 - [x] `npm run validate:source`
+- [ ] `npm run verify:career-guide` regenerates the guide deterministically and leaves the committed PDF unchanged
+- [ ] `npm run validate:pdf` passes structural, render, nonblank-page, text, metadata, font, and external-engine checks
+- [ ] `npm run test:pdf` rejects controlled malformed, wrong-extension, wrong-header, wrong-page-count, visually blank, and source/build mismatch fixtures
 - [x] `npm test`, including staging Edge gate tests
 - [x] `npm run check`
 - [x] `PUBLIC_FORMS_ENABLED=false npm run build`
 - [x] Built-output audit confirms noindex, robots, links, accessibility associations, and disabled forms
 - [x] `npm run netlify:smoke`
-- [x] Standard GitHub Actions workflow run #43 succeeded for commit `7aa4d50141586638d090942928aa78d6fd8b330e`
+- [ ] The post-remediation `Validate website` run succeeds and uploads `career-guide-pdf-validation` evidence
 
 ## Staging deployment workflow
 
@@ -30,7 +33,7 @@
 - [ ] Visible article routes render when approved/test content exists
 - [ ] Navigation, mobile menu, footer, breadcrumbs, CTAs, legal links, and resource links work
 - [ ] Custom 404 works
-- [ ] Draft PDF downloads over HTTPS and remains noindex
+- [ ] Draft PDF downloads over HTTPS, remains noindex, parses cleanly, renders four nonblank pages, and exposes meaningful text
 - [ ] Small mobile through large desktop layouts pass
 - [ ] Keyboard, focus, headings, labels, status messages, contrast, zoom, reduced motion, and touch targets pass
 - [ ] Security headers and CSP pass
