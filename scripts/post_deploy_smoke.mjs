@@ -65,7 +65,7 @@ for (const [path, expectedText] of routes) {
 
 const insights = await request('/insights/');
 const insightsBody = await insights.text();
-const articleLinks = [...insightsBody.matchAll(/href=["'](\/insights\/[^"'#?]+\/?)["']/g)].map(match => match[1]);
+const articleLinks = [...insightsBody.matchAll(/href=["'](\/insights\/[^"'#?]+\/?)['"]/g)].map(match => match[1]);
 for (const articlePath of [...new Set(articleLinks)]) {
   const response = await request(articlePath);
   record(response.status === 200, `${articlePath} returned ${response.status}, expected 200.`);
@@ -85,7 +85,10 @@ record((pdf.headers.get('x-robots-tag') || '').includes('noindex'), 'Draft PDF i
 const missing = await request('/technical-staging-missing-route/');
 record(missing.status === 404, `Custom missing route returned ${missing.status}, expected 404.`);
 const missingBody = await missing.text();
-record(missingBody.includes('Page not found'), 'Custom 404 response is missing its main message.');
+record(
+  /<h1[^>]*>\s*This page could not be found\.\s*<\/h1>/i.test(missingBody),
+  'Custom 404 response is missing its main message.'
+);
 
 for (const path of ['/recruitment-application/', '/book-consultation/', '/contact/']) {
   const response = await request(path);
