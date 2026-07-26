@@ -3,15 +3,11 @@ from __future__ import annotations
 from pathlib import Path
 import hashlib
 
-import reportlab
-
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas as canvas_module
 from reportlab.platypus import (
     BaseDocTemplate,
@@ -38,18 +34,8 @@ WARM = colors.HexColor("#FBF7EF")
 LINE = colors.HexColor("#D7DFDA")
 ERROR = colors.HexColor("#8E352E")
 
-REPORTLAB_FONT_DIR = Path(reportlab.__file__).resolve().parent / "fonts"
-FONT_REGULAR_PATH = REPORTLAB_FONT_DIR / "Vera.ttf"
-FONT_BOLD_PATH = REPORTLAB_FONT_DIR / "VeraBd.ttf"
-FONT_REGULAR = "GuideSans"
-FONT_BOLD = "GuideSans-Bold"
-
-for font_path in (FONT_REGULAR_PATH, FONT_BOLD_PATH):
-    if not font_path.is_file():
-        raise FileNotFoundError(f"Required embedded font is unavailable: {font_path}")
-
-pdfmetrics.registerFont(TTFont(FONT_REGULAR, str(FONT_REGULAR_PATH)))
-pdfmetrics.registerFont(TTFont(FONT_BOLD, str(FONT_BOLD_PATH)))
+FONT_REGULAR = "Helvetica"
+FONT_BOLD = "Helvetica-Bold"
 
 styles = getSampleStyleSheet()
 styles.add(ParagraphStyle(name="GuideTitle", parent=styles["Title"], fontName=FONT_BOLD, fontSize=27, leading=31, textColor=GREEN, spaceAfter=8 * mm, alignment=TA_LEFT))

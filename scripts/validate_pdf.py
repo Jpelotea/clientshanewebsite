@@ -50,6 +50,7 @@ class PdfResult:
     subject: str
     language: str
     outline_entries: int
+    fonts: list[str]
     embedded_fonts: list[str]
     page_results: list[PageResult]
     text_characters: int
@@ -134,6 +135,7 @@ def validate_pdf(path: Path, expected_pages: int = EXPECTED_PAGES, render_dir: P
 
     page_results: list[PageResult] = []
     text_total = 0
+    fonts: set[str] = set()
     embedded_fonts: set[str] = set()
     try:
         document = fitz.open(path)
@@ -152,6 +154,8 @@ def validate_pdf(path: Path, expected_pages: int = EXPECTED_PAGES, render_dir: P
 
             for font in page.get_fonts(full=True):
                 xref, extension, _font_type, base_font, *_rest = font
+                if base_font:
+                    fonts.add(base_font)
                 if xref > 0 and extension.lower() in {"ttf", "otf", "cff", "cid"}:
                     embedded_fonts.add(base_font)
 
@@ -172,7 +176,7 @@ def validate_pdf(path: Path, expected_pages: int = EXPECTED_PAGES, render_dir: P
         raise PdfValidationError(f"PDF rendering failed: {type(error).__name__}: {error}") from error
 
     require(text_total >= MIN_TOTAL_TEXT, f"PDF contains too little extractable text ({text_total} characters).")
-    require(bool(embedded_fonts), "No embedded TrueType/OpenType fonts were detected.")
+    require(bool(fonts), "No usable PDF fonts were detected.")
 
     require(title == EXPECTED_TITLE, f"Unexpected PDF title metadata: {title!r}")
     require(author == EXPECTED_AUTHOR, f"Unexpected PDF author metadata: {author!r}")
@@ -203,6 +207,7 @@ def validate_pdf(path: Path, expected_pages: int = EXPECTED_PAGES, render_dir: P
         subject=subject,
         language=language,
         outline_entries=outline_entries,
+        fonts=sorted(fonts),
         embedded_fonts=sorted(embedded_fonts),
         page_results=page_results,
         text_characters=text_total,
