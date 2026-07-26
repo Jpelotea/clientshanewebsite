@@ -19,6 +19,9 @@ EXCLUDED_PARTS = {
     'private-uploads',
     'test-uploads',
 }
+GENERATED_PUBLIC_PATHS = {
+    '/documents/financial-advisor-career-fit-guide-draft.pdf': ROOT / 'scripts' / 'generate_career_guide.py',
+}
 errors: list[str] = []
 checks: list[Path] = []
 
@@ -78,6 +81,11 @@ public_paths = {
     for path in (ROOT / 'public').rglob('*')
     if path.is_file()
 }
+for public_path, generator in GENERATED_PUBLIC_PATHS.items():
+    if generator.is_file():
+        public_paths.add(public_path)
+    else:
+        errors.append(f'Missing generator for public artifact {public_path}: {generator.relative_to(ROOT)}')
 
 source_files = list((ROOT / 'src').rglob('*.astro')) + list((ROOT / 'src/content').rglob('*.md'))
 for path in source_files:

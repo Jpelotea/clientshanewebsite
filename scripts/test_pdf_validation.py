@@ -26,9 +26,13 @@ def main() -> None:
     valid = validate_pdf(SOURCE)
     assert valid.pages == 4
     assert valid.text_characters >= 1_500
+    assert valid.fonts
 
     with tempfile.TemporaryDirectory(prefix="career-guide-regression-") as temporary:
         folder = Path(temporary)
+
+        missing = folder / "missing.pdf"
+        expect_failure(missing, "missing PDF", "Expected PDF is missing")
 
         wrong_extension = folder / "career-guide.txt"
         shutil.copy2(SOURCE, wrong_extension)
@@ -71,7 +75,6 @@ def main() -> None:
             handle.write(b"\n%" + b" controlled visually blank fixture" * 300)
         expect_failure(blank, "visually blank page", "appears blank")
 
-
         missing_metadata = folder / "missing-metadata.pdf"
         document = fitz.open(SOURCE)
         document.set_metadata({})
@@ -90,7 +93,7 @@ def main() -> None:
         else:
             raise AssertionError("The PDF validator incorrectly accepted mismatched source and built artifacts.")
 
-    print("PDF validator regression tests passed: valid, extension, header, truncated, page-count, visually blank, metadata, and mismatch fixtures.")
+    print("PDF validator regression tests passed: valid, missing, extension, header, truncated, page-count, visually blank, metadata, and mismatch fixtures.")
 
 
 if __name__ == "__main__":
