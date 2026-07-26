@@ -91,7 +91,7 @@ describe('targeted technical remediation regressions', () => {
     const helper = read('scripts/post_deploy_smoke_support.mjs');
     expect(smoke).toContain("['/admin/', 'Shane Perez Content Editor']");
     expect(smoke).toContain("['/recruitment-application/', 'Submit your application']");
-    expect(smoke).toContain"(['/book-consultation/', 'Request a consultation']");
+    expect(smoke).toContain("['/book-consultation/', 'Request a consultation']");
     expect(smoke).toContain("['/contact/', 'Send an inquiry']");
     expect(smoke).toContain("!/<script[^>]+src=[\"'][^\"']*googletagmanager/i");
     expect(smoke).toContain("!/<script[^>]+src=[\"'][^\"']*connect\\.facebook\\.net/i");
