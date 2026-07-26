@@ -64,7 +64,7 @@ jobs:
         run: npm test
 
       - name: Run Astro and TypeScript checks
-        run: npm run check
+        run: npm run check 2>&1 | tee astro-check.log
 
       - name: Build production output
         env:
@@ -95,6 +95,15 @@ jobs:
             public/documents/financial-advisor-career-fit-guide-draft.pdf
           retention-days: 30
           if-no-files-found: error
+
+      - name: Upload Astro check diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: astro-check-diagnostics
+          path: astro-check.log
+          retention-days: 7
+          if-no-files-found: ignore
 
       - name: Upload Netlify local smoke diagnostics
         if: always()
