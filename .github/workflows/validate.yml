@@ -82,7 +82,7 @@ jobs:
           PUBLIC_PROFILE_CLAIMS_VERIFIED: 'false'
           PUBLIC_FORMS_ENABLED: 'false'
           PUBLIC_SITE_URL: 'http://localhost:8888'
-        run: npm run netlify:smoke
+        run: npm run netlify:smoke 2>&1 | tee netlify-smoke-output.log
 
       - name: Upload PDF validation evidence
         if: always()
@@ -112,7 +112,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: netlify-local-smoke-log
-          path: /tmp/shane-netlify-dev.log
+          path: |
+            /tmp/shane-netlify-dev.log
+            netlify-smoke-output.log
           retention-days: 7
           if-no-files-found: ignore
 
