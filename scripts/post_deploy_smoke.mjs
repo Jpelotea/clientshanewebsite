@@ -1,4 +1,9 @@
 import process from 'node:process';
+import {
+  createRequestClient,
+  hasExpectedCustom404Heading,
+  waitForDeploymentReady
+} from './post_deploy_smoke_support.mjs';
 
 const deployUrl = required('DEPLOY_URL').replace(/\/$/, '');
 const primaryUrl = required('PRIMARY_STAGING_URL').replace(/\/$/, '');
@@ -40,17 +45,13 @@ function record(condition, message) {
   if (!condition) findings.push(message);
 }
 
-async function request(path, options = {}, authenticated = true) {
-  const headers = new Headers(options.headers || {});
-  if (authenticated) headers.set('Authorization', authorization);
-  return fetch(`${deployUrl}${path}`, {
-    redirect: 'manual',
-    ...options,
-    headers
-  });
-}
+const { request, metrics } = createRequestClient({
+  baseUrl: deployUrl,
+  authorization
+});
 
-const unauthorized = await request('/', {}, false);
+const readiness = await waitForDeploymentReady({ request });
+const unauthorized = readiness.response;
 record(unauthorized.status === 401, `Expected unauthenticated / to return 401, received ${unauthorized.status}.`);
 record((unauthorized.headers.get('www-authenticate') || '').startsWith('Basic '), 'Missing Basic authentication challenge.');
 record((unauthorized.headers.get('cache-control') || '').includes('no-store'), 'Unauthorized response is missing no-store cache control.');
@@ -85,10 +86,7 @@ record((pdf.headers.get('x-robots-tag') || '').includes('noindex'), 'Draft PDF i
 const missing = await request('/technical-staging-missing-route/');
 record(missing.status === 404, `Custom missing route returned ${missing.status}, expected 404.`);
 const missingBody = await missing.text();
-record(
-  /<h1[^>]*>\s*This page could not be found\.\s*<\/h1>/i.test(missingBody),
-  'Custom 404 response is missing its main message.'
-);
+record(hasExpectedCustom404Heading(missingBody), 'Custom 404 response is missing its main message.');
 
 for (const path of ['/recruitment-application/', '/book-consultation/', '/contact/']) {
   const response = await request(path);
@@ -126,4 +124,8 @@ if (findings.length) {
   process.exit(1);
 }
 
-console.log(`Post-deployment smoke test passed: ${checked} checks against ${deployUrl}.`);
+const totalRetries = metrics.retryEvents + readiness.retryEvents;
+console.log(
+  `Post-deployment smoke test passed: ${checked} checks against ${deployUrl}. ` +
+  `Readiness attempts: ${readiness.attempts}. Retry events: ${totalRetries}. Primary staging URL: ${primaryUrl}.`
+);
