@@ -1,0 +1,5 @@
+---
+interface Props { href: string; variant?: 'primary' | 'secondary' | 'light' | 'text'; tracking?: string; external?: boolean; class?: string; }
+const { href, variant = 'primary', tracking, external = false, class: className = '' } = Astro.props;
+---
+<a class={`button button--${variant} ${className}`} href={href} data-track={tracking} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined}><slot /></a>

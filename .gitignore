@@ -1,0 +1,16 @@
+
+!.env.example
+*.log
+*.py[cod]
+.DS_Store
+.astro/
+.env
+.env.*
+.netlify/
+__pycache__/
+coverage/
+dist/
+node_modules/
+private-uploads/
+test-uploads/
+public/documents/financial-advisor-career-fit-guide-draft.pdf

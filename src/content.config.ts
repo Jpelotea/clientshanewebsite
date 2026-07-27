@@ -1,0 +1,9 @@
+import { defineCollection, z } from 'astro:content';
+const workflow = z.enum(['draft','review','approved','archived']);
+const articles=defineCollection({type:'content',schema:z.object({title:z.string(),description:z.string(),category:z.enum(['Leadership','Career Development','Financial Education','Professional Growth']),publishDate:z.coerce.date(),updatedDate:z.coerce.date().optional(),author:z.string().default('Shane Perez'),status:workflow.default('draft'),featured:z.boolean().default(false),image:z.string().optional(),imageAlt:z.string().optional(),approvalNote:z.string().optional()})});
+const testimonials=defineCollection({type:'data',schema:z.object({name:z.string(),role:z.string(),type:z.enum(['Financial Advisor','Leadership','Team Success','Client']),quote:z.string(),status:workflow.default('draft'),permissionConfirmed:z.boolean().default(false),photo:z.string().optional(),photoAlt:z.string().optional()})});
+const leaders=defineCollection({type:'data',schema:z.object({name:z.string(),role:z.string(),summary:z.string(),status:workflow.default('draft'),photo:z.string().optional(),photoAlt:z.string().optional(),achievements:z.array(z.string()).default([])})});
+const events=defineCollection({type:'data',schema:z.object({title:z.string(),location:z.string(),year:z.number(),summary:z.string(),status:workflow.default('draft'),image:z.string().optional(),imageAlt:z.string().optional()})});
+const achievements=defineCollection({type:'data',schema:z.object({title:z.string(),yearLabel:z.string(),summary:z.string(),status:workflow.default('draft'),verificationRequired:z.boolean().default(true)})});
+const resources=defineCollection({type:'data',schema:z.object({title:z.string(),description:z.string(),file:z.string(),status:workflow.default('draft'),directDownload:z.boolean().default(true)})});
+export const collections={articles,testimonials,leaders,events,achievements,resources};

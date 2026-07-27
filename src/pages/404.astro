@@ -1,0 +1,4 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';import ButtonLink from '@/components/global/ButtonLink.astro';
+---
+<BaseLayout title="Page Not Found" description="The requested page could not be found." noindex={true}><section class="section section--muted" style="min-height:65vh;display:grid;align-items:center"><div class="container prose" style="text-align:center;margin-inline:auto"><span class="eyebrow">404</span><h1>This page could not be found.</h1><p class="lead">The address may have changed, or the page may not yet be available.</p><div class="cluster" style="justify-content:center"><ButtonLink href="/">Return Home</ButtonLink><ButtonLink href="/contact/" variant="secondary">Contact Shane’s Team</ButtonLink></div></div></section></BaseLayout>

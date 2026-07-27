@@ -1,0 +1,4 @@
+---
+import {getCollection,render} from 'astro:content';import ArticleLayout from '@/layouts/ArticleLayout.astro';import{showDraftContent}from '@/lib/content';export async function getStaticPaths(){const entries=await getCollection('articles');return entries.filter(entry=>showDraftContent||entry.data.status==='approved').map(entry=>({params:{slug:entry.id.replace(/\.md$/,'')},props:{entry}}));}const{entry}=Astro.props;const{Content}=await render(entry);
+---
+<ArticleLayout {...entry.data}><Content/></ArticleLayout>

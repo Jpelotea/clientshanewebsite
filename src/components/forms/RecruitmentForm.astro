@@ -1,0 +1,47 @@
+---
+import Turnstile from './Turnstile.astro';
+import FormStatus from './FormStatus.astro';
+import FormEnhancement from './FormEnhancement.astro';
+import FormAvailabilityNotice from './FormAvailabilityNotice.astro';
+
+const formsEnabled = import.meta.env.PUBLIC_FORMS_ENABLED === 'true';
+const disabledNoticeId = 'recruitment-form-disabled';
+---
+<form
+  class="form"
+  action="/api/forms/recruitment"
+  method="post"
+  enctype="multipart/form-data"
+  data-async-form={formsEnabled ? '' : undefined}
+  data-conversion-event="recruitment_application_submit"
+  aria-describedby={!formsEnabled ? disabledNoticeId : undefined}
+>
+  {!formsEnabled && <FormAvailabilityNotice id={disabledNoticeId} />}
+  <fieldset class="form-fieldset" disabled={!formsEnabled}>
+    <legend class="sr-only">Recruitment application information</legend>
+    <div class="form-grid">
+      <div class="field"><label for="fullName">Full name <span class="required">*</span></label><input id="fullName" name="fullName" autocomplete="name" required maxlength="120" /></div>
+      <div class="field"><label for="email">Email <span class="required">*</span></label><input id="email" name="email" type="email" autocomplete="email" required maxlength="160" /></div>
+      <div class="field"><label for="mobile">Mobile number <span class="required">*</span></label><input id="mobile" name="mobile" type="tel" autocomplete="tel" required maxlength="40" /></div>
+      <div class="field"><label for="location">City / location <span class="required">*</span></label><input id="location" name="location" autocomplete="address-level2" required maxlength="120" /></div>
+      <div class="field"><label for="profession">Current profession <span class="required">*</span></label><input id="profession" name="profession" required maxlength="120" /></div>
+      <div class="field"><label for="employer">Current employer <span class="help">Optional</span></label><input id="employer" name="employer" maxlength="140" /></div>
+      <div class="field"><label for="education">Educational background <span class="required">*</span></label><input id="education" name="education" required maxlength="180" /></div>
+      <div class="field"><label for="yearsExperience">Relevant years of experience <span class="required">*</span></label><select id="yearsExperience" name="yearsExperience" required><option value="">Select</option><option>Less than 2 years</option><option>2–4 years</option><option>5–9 years</option><option>10 years or more</option></select></div>
+      <div class="field"><label for="opportunity">Opportunity of interest <span class="required">*</span></label><select id="opportunity" name="opportunity" required><option value="">Select</option><option>Financial Advisor career</option><option>Leadership opportunity</option><option>Career transition discussion</option></select></div>
+      <div class="field"><label for="contactMethod">Preferred contact method <span class="required">*</span></label><select id="contactMethod" name="contactMethod" required><option value="">Select</option><option>Email</option><option>Mobile call</option><option>SMS</option><option>Messenger</option></select></div>
+      <div class="field field--full"><label for="reason">Why are you interested in this opportunity? <span class="required">*</span></label><textarea id="reason" name="reason" required maxlength="1800"></textarea></div>
+      <div class="field field--full"><label for="strengths">Relevant strengths and experience <span class="required">*</span></label><textarea id="strengths" name="strengths" required maxlength="1800"></textarea></div>
+      <div class="field field--full"><label for="leadershipExperience">Leadership experience <span class="help">Optional</span></label><textarea id="leadershipExperience" name="leadershipExperience" maxlength="1400"></textarea></div>
+      <div class="field field--full"><label for="interviewAvailability">Availability for an initial interview <span class="required">*</span></label><textarea id="interviewAvailability" name="interviewAvailability" required maxlength="600" placeholder="Provide preferred days and times. This is not an automatic booking."></textarea></div>
+      <div class="field field--full"><label for="resume">Résumé <span class="required">*</span></label><input id="resume" name="resume" type="file" required accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" /><small class="help">PDF, DOC, or DOCX only. Maximum 4 MB. Files are stored privately and shared through a time-limited protected link.</small></div>
+      <div class="field field--full honeypot" aria-hidden="true"><label for="website">Leave this field empty</label><input id="website" name="website" tabindex="-1" autocomplete="off" /></div>
+      <div class="field field--full"><label class="checkbox" for="recruitmentDataConsent"><input id="recruitmentDataConsent" type="checkbox" name="dataConsent" value="yes" required /><span>I have read the <a href="/privacy-policy/" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and consent to the processing of my application information and résumé for recruitment review. <span class="required">*</span></span></label></div>
+      <div class="field field--full"><label class="checkbox" for="accuracyConfirmation"><input id="accuracyConfirmation" type="checkbox" name="accuracyConfirmation" value="yes" required /><span>I confirm that the information provided is accurate. I understand that submission does not guarantee selection, employment, appointment, admission, income, earnings, promotion, or career success. <span class="required">*</span></span></label></div>
+      {formsEnabled && <Turnstile />}
+    </div>
+    <button class="button button--primary" type="submit">Submit Application</button>
+  </fieldset>
+  <FormStatus />
+</form>
+{formsEnabled && <FormEnhancement />}

@@ -1,0 +1,35 @@
+---
+import Turnstile from './Turnstile.astro';
+import FormStatus from './FormStatus.astro';
+import FormEnhancement from './FormEnhancement.astro';
+import FormAvailabilityNotice from './FormAvailabilityNotice.astro';
+
+const formsEnabled = import.meta.env.PUBLIC_FORMS_ENABLED === 'true';
+const disabledNoticeId = 'contact-form-disabled';
+---
+<form
+  class="form"
+  action="/api/forms/contact"
+  method="post"
+  data-async-form={formsEnabled ? '' : undefined}
+  data-conversion-event="contact_form_submit"
+  aria-describedby={!formsEnabled ? disabledNoticeId : undefined}
+>
+  {!formsEnabled && <FormAvailabilityNotice id={disabledNoticeId} />}
+  <fieldset class="form-fieldset" disabled={!formsEnabled}>
+    <legend class="sr-only">General contact information</legend>
+    <div class="form-grid">
+      <div class="field"><label for="contactFullName">Full name <span class="required">*</span></label><input id="contactFullName" name="fullName" autocomplete="name" required maxlength="120" /></div>
+      <div class="field"><label for="contactEmail">Email <span class="required">*</span></label><input id="contactEmail" name="email" type="email" autocomplete="email" required maxlength="160" /></div>
+      <div class="field"><label for="contactMobile">Mobile number <span class="help">Optional</span></label><input id="contactMobile" name="mobile" type="tel" autocomplete="tel" maxlength="40" /></div>
+      <div class="field"><label for="contactSubject">Subject <span class="required">*</span></label><input id="contactSubject" name="subject" required maxlength="160" /></div>
+      <div class="field field--full"><label for="contactMessage">Message <span class="required">*</span></label><textarea id="contactMessage" name="message" required maxlength="2200"></textarea></div>
+      <div class="field field--full honeypot" aria-hidden="true"><label for="contactWebsite">Leave this field empty</label><input id="contactWebsite" name="website" tabindex="-1" autocomplete="off" /></div>
+      <div class="field field--full"><label class="checkbox" for="contactDataConsent"><input id="contactDataConsent" type="checkbox" name="dataConsent" value="yes" required /><span>I consent to the processing of my information for responding to this inquiry. <span class="required">*</span></span></label></div>
+      {formsEnabled && <Turnstile />}
+    </div>
+    <button class="button button--primary" type="submit">Send Inquiry</button>
+  </fieldset>
+  <FormStatus />
+</form>
+{formsEnabled && <FormEnhancement />}

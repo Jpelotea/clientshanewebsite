@@ -1,0 +1,9 @@
+---
+interface Props { title: string; description: string; category: string; href: string; status?: string; }
+const { title, description, category, href, status = 'approved' } = Astro.props;
+---
+<article class="card">
+  <div class="cluster"><span class="badge">{category}</span>{status !== 'approved' && <span class="badge">Draft preview</span>}</div>
+  <h3><a href={href}>{title}</a></h3><p>{description}</p>
+  <a class="button button--text" href={href}>Read insight <span aria-hidden="true">→</span></a>
+</article>

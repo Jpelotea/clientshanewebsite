@@ -1,0 +1,11 @@
+---
+import MediaPlaceholder from '@/components/global/MediaPlaceholder.astro';
+interface Props { name: string; role: string; summary: string; achievements?: string[]; photo?: string; photoAlt?: string; approved?: boolean; }
+const { name, role, summary, achievements = [], photo, photoAlt, approved = false } = Astro.props;
+---
+<article class="card">
+  {photo ? <img src={photo} alt={photoAlt || ''} loading="lazy" width="640" height="500" /> : <MediaPlaceholder label="[APPROVED LEADERSHIP PHOTO REQUIRED]" height="14rem" />}
+  <h3>{name}</h3><p class="badge">{role}</p><p>{summary}</p>
+  {achievements.length > 0 && <ul>{achievements.map(item => <li>{item}</li>)}</ul>}
+  {!approved && <p class="help">[PROFILE REQUIRES THE LEADER’S CONFIRMATION AND PUBLICATION PERMISSION]</p>}
+</article>

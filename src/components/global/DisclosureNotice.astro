@@ -1,0 +1,4 @@
+---
+interface Props { type?: 'info' | 'warning'; title?: string; } const { type = 'info', title } = Astro.props;
+---
+<aside class={`notice ${type === 'warning' ? 'notice--warning' : ''}`}>{title && <strong>{title}</strong>}<slot /></aside>

@@ -1,0 +1,33 @@
+---
+import MediaPlaceholder from '@/components/global/MediaPlaceholder.astro';
+
+interface Props {
+  title: string;
+  location: string;
+  year: number;
+  summary: string;
+  image?: string;
+  imageAlt?: string;
+  approved?: boolean;
+  headingLevel?: 'h2' | 'h3';
+}
+
+const {
+  title,
+  location,
+  year,
+  summary,
+  image,
+  imageAlt,
+  approved = false,
+  headingLevel = 'h3',
+} = Astro.props;
+---
+<article class="card">
+  {image ? <img src={image} alt={imageAlt || ''} loading="lazy" width="720" height="480" /> : <MediaPlaceholder label="[APPROVED EVENT PHOTO REQUIRED]" height="13rem" />}
+  <span class="badge">{year}</span>
+  {headingLevel === 'h2' ? <h2>{title}</h2> : <h3>{title}</h3>}
+  <p><strong>{location}</strong></p>
+  <p>{summary}</p>
+  {!approved && <p class="help">[EVENT DETAILS AND IMAGE REQUIRE FINAL VERIFICATION]</p>}
+</article>

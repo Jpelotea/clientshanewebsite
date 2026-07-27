@@ -1,0 +1,9 @@
+---
+interface Props { title: string; description: string; points: readonly string[] | string[]; }
+const { title, description, points } = Astro.props;
+---
+<article class="card card--accent">
+  <h3>{title}</h3>
+  <p>{description}</p>
+  <ul>{points.map(point => <li>{point}</li>)}</ul>
+</article>

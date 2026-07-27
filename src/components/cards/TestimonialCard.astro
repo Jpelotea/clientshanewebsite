@@ -1,0 +1,10 @@
+---
+import MediaPlaceholder from '@/components/global/MediaPlaceholder.astro';
+interface Props { name: string; role: string; quote: string; type: string; approved?: boolean; photo?: string; photoAlt?: string; }
+const { name, role, quote, type, approved = false, photo, photoAlt } = Astro.props;
+---
+<figure class="card">
+  {photo ? <img src={photo} alt={photoAlt || ''} loading="lazy" width="640" height="420" /> : <MediaPlaceholder label="[TESTIMONIAL PHOTO PENDING APPROVAL]" height="10rem" />}
+  <blockquote>“{quote}”</blockquote><figcaption><strong>{name}</strong><br />{role} · {type}</figcaption>
+  {!approved && <p class="help">[TESTIMONIAL PENDING WRITTEN PERMISSION AND FINAL APPROVAL]</p>}
+</figure>

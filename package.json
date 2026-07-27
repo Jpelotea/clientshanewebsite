@@ -1,0 +1,47 @@
+{
+  "name": "shane-perez-personal-brand-website",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "prebuild": "npm run generate:career-guide",
+    "build": "astro check && astro build && python3 scripts/audit_dist.py && python3 scripts/validate_pdf.py --source public/documents/financial-advisor-career-fit-guide-draft.pdf --built dist/documents/financial-advisor-career-fit-guide-draft.pdf",
+    "preview": "astro preview",
+    "check": "astro check",
+    "lint": "astro check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "validate:source": "python3 scripts/validate_project.py",
+    "validate": "npm run verify:career-guide && npm run validate:source && npm run test:pdf && npm run test && npm run build",
+    "cms:local": "npx decap-server",
+    "netlify:dev": "netlify dev",
+    "netlify:smoke": "bash scripts/netlify_smoke.sh",
+    "postdeploy:smoke": "node scripts/post_deploy_smoke.mjs",
+    "generate:career-guide": "python3 scripts/generate_career_guide.py",
+    "validate:pdf": "python3 scripts/validate_pdf.py --source public/documents/financial-advisor-career-fit-guide-draft.pdf",
+    "test:pdf": "python3 scripts/test_pdf_validation.py",
+    "verify:career-guide": "rm -f public/documents/financial-advisor-career-fit-guide-draft.pdf && npm run generate:career-guide && npm run validate:pdf"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.6.0",
+    "@aws-sdk/client-s3": "^3.1000.0",
+    "@aws-sdk/s3-request-presigner": "^3.1000.0",
+    "@netlify/functions": "^4.2.0",
+    "astro": "^7.1.0",
+    "resend": "^6.9.0",
+    "zod": "^4.3.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.6",
+    "decap-server": "^3.3.1",
+    "netlify-cli": "^23.15.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0",
+    "@types/node": "^22.0.0"
+  },
+  "engines": {
+    "node": "22.x",
+    "npm": ">=10 <12"
+  }
+}

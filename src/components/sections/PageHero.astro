@@ -1,0 +1,4 @@
+---
+import Breadcrumbs from '@/components/global/Breadcrumbs.astro'; interface Props { eyebrow?:string; title:string; description:string; breadcrumbs?:{label:string;href?:string}[]; } const {eyebrow,title,description,breadcrumbs}=Astro.props;
+---
+{breadcrumbs&&<Breadcrumbs items={breadcrumbs}/>}<header class="section section--muted"><div class="container prose">{eyebrow&&<span class="eyebrow">{eyebrow}</span>}<h1>{title}</h1><p class="lead">{description}</p></div></header>

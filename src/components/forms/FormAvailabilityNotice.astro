@@ -1,0 +1,10 @@
+---
+interface Props {
+  id: string;
+}
+const { id } = Astro.props;
+---
+<div class="notice notice--warning" id={id} role="status">
+  <strong>Technical staging notice.</strong>
+  This form is temporarily disabled in the technical staging environment. No information will be submitted or stored.
+</div>
