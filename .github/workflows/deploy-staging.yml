@@ -182,6 +182,71 @@ jobs:
           PRIMARY_STAGING_URL: ${{ steps.deploy.outputs.primary_url }}
         run: npm run postdeploy:smoke
 
+      - name: Validate live Career-Fit Guide PDF
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
+          EXPECTED_PDF_SHA256: 413bf9808bc74976acaf463d058fb24f16c6da5b2b9da1b44509e17464541fad
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p live-pdf-validation/renders
+          python <<'PYTHON'
+          import base64
+          import json
+          import os
+          import urllib.request
+          from pathlib import Path
+
+          deploy_url = os.environ['DEPLOY_URL'].rstrip('/')
+          username = os.environ['STAGING_ACCESS_USERNAME']
+          password = os.environ['STAGING_ACCESS_PASSWORD']
+          token = base64.b64encode(f'{username}:{password}'.encode()).decode()
+          request = urllib.request.Request(
+              f'{deploy_url}/documents/financial-advisor-career-fit-guide-draft.pdf',
+              headers={'Authorization': f'Basic {token}', 'Accept': 'application/pdf'},
+          )
+          with urllib.request.urlopen(request, timeout=30) as response:
+              status = response.status
+              headers = {key.lower(): value for key, value in response.headers.items()}
+              body = response.read()
+
+          if status != 200:
+              raise SystemExit(f'Live PDF returned HTTP {status}; expected 200.')
+          if 'application/pdf' not in headers.get('content-type', '').lower():
+              raise SystemExit('Live PDF has an unexpected Content-Type.')
+          if 'noindex' not in headers.get('x-robots-tag', '').lower():
+              raise SystemExit('Live PDF is missing X-Robots-Tag noindex.')
+          if 'no-store' not in headers.get('cache-control', '').lower():
+              raise SystemExit('Live PDF is missing no-store cache control.')
+
+          output = Path('live-pdf-validation/live-career-guide.pdf')
+          output.write_bytes(body)
+          evidence = {
+              'status': status,
+              'content_type': headers.get('content-type', ''),
+              'x_robots_tag': headers.get('x-robots-tag', ''),
+              'cache_control': headers.get('cache-control', ''),
+              'bytes': len(body),
+          }
+          Path('live-pdf-validation/http.json').write_text(json.dumps(evidence, indent=2, sort_keys=True))
+          print('Live PDF HTTP checks passed.')
+          PYTHON
+          ACTUAL_PDF_SHA256="$(sha256sum live-pdf-validation/live-career-guide.pdf | awk '{print $1}')"
+          test "${ACTUAL_PDF_SHA256}" = "${EXPECTED_PDF_SHA256}"
+          python scripts/validate_pdf.py \
+            --source live-pdf-validation/live-career-guide.pdf \
+            --render-dir live-pdf-validation/renders \
+            | tee live-pdf-validation/pdf-validation.json
+
+      - name: Upload live PDF validation evidence
+        if: always() && hashFiles('live-pdf-validation/**') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-career-guide-pdf-validation
+          path: live-pdf-validation
+          retention-days: 30
+          if-no-files-found: error
+
       - name: Publish recoverable draft status
         if: always() && steps.deploy.outputs.deploy_id != ''
         uses: actions/github-script@v7
