@@ -56,6 +56,7 @@ jobs:
 
       - name: Verify and validate Career-Fit Guide PDF
         run: |
+          set -euo pipefail
           npm run verify:career-guide
           npm run --silent validate:pdf -- --render-dir pdf-validation-renders | tee pdf-validation.json
           npm run test:pdf
@@ -64,7 +65,9 @@ jobs:
         run: npm test
 
       - name: Run Astro and TypeScript checks
-        run: npm run check 2>&1 | tee astro-check.log
+        run: |
+          set -euo pipefail
+          npm run check 2>&1 | tee astro-check.log
 
       - name: Build production output
         env:
@@ -73,7 +76,9 @@ jobs:
           PUBLIC_PROFILE_CLAIMS_VERIFIED: 'false'
           PUBLIC_FORMS_ENABLED: 'false'
           PUBLIC_SITE_URL: 'https://shane-perez-staging.netlify.app'
-        run: npm run build 2>&1 | tee build.log
+        run: |
+          set -euo pipefail
+          npm run build 2>&1 | tee build.log
 
       - name: Run Netlify local smoke test
         env:
@@ -82,7 +87,9 @@ jobs:
           PUBLIC_PROFILE_CLAIMS_VERIFIED: 'false'
           PUBLIC_FORMS_ENABLED: 'false'
           PUBLIC_SITE_URL: 'http://localhost:8888'
-        run: npm run netlify:smoke 2>&1 | tee netlify-smoke-output.log
+        run: |
+          set -euo pipefail
+          npm run netlify:smoke 2>&1 | tee netlify-smoke-output.log
 
       - name: Upload PDF validation evidence
         if: always()
