@@ -26,21 +26,17 @@ const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID || '';
   </div>
 </div>
 <script define:vars={{ gaId, metaPixelId }}>
-  type ConsentChoice = { analytics: boolean; marketing: boolean };
-  type BackgroundState = { inert: boolean; ariaHidden: string | null };
-  type MetaPixelFunction = NonNullable<Window['fbq']>;
-
   const key = 'sp-cookie-consent-v2';
-  const backdrop = document.querySelector<HTMLElement>('[data-cookie-backdrop]');
-  const banner = document.querySelector<HTMLElement>('[data-cookie-banner]');
+  const backdrop = document.querySelector('[data-cookie-backdrop]');
+  const banner = document.querySelector('[data-cookie-banner]');
   const title = document.getElementById('cookie-title');
-  const analyticsInput = document.querySelector<HTMLInputElement>('[data-cookie-analytics]');
-  const marketingInput = document.querySelector<HTMLInputElement>('[data-cookie-marketing]');
-  const backgroundStates = new Map<HTMLElement, BackgroundState>();
-  let returnFocus: HTMLElement | null = null;
+  const analyticsInput = document.querySelector('[data-cookie-analytics]');
+  const marketingInput = document.querySelector('[data-cookie-marketing]');
+  const backgroundStates = new Map();
+  let returnFocus = null;
 
   const dataLayer = window.dataLayer = window.dataLayer || [];
-  const gtag = window.gtag = window.gtag || ((...args: unknown[]) => dataLayer.push(args));
+  const gtag = window.gtag = window.gtag || ((...args) => dataLayer.push(args));
   gtag('consent', 'default', {
     analytics_storage: 'denied',
     ad_storage: 'denied',
@@ -49,7 +45,7 @@ const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID || '';
     wait_for_update: 500,
   });
 
-  function deleteAnalyticsCookies(): void {
+  function deleteAnalyticsCookies() {
     document.cookie
       .split(';')
       .map((item) => item.trim().split('=')[0])
@@ -59,7 +55,7 @@ const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID || '';
       });
   }
 
-  function loadAnalytics(): void {
+  function loadAnalytics() {
     if (!gaId || document.querySelector('[data-ga-loader]')) return;
     const script = document.createElement('script');
     script.async = true;
@@ -70,14 +66,14 @@ const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID || '';
     gtag('config', gaId, { anonymize_ip: true });
   }
 
-  function loadMeta(): void {
+  function loadMeta() {
     if (!metaPixelId) return;
     let meta = window.fbq;
     if (!meta) {
-      const queuedMeta = ((...args: unknown[]) => {
+      const queuedMeta = (...args) => {
         if (queuedMeta.callMethod) queuedMeta.callMethod(...args);
         else queuedMeta.queue?.push(args);
-      }) as MetaPixelFunction;
+      };
       queuedMeta.queue = [];
       queuedMeta.loaded = true;
       queuedMeta.version = '2.0';
@@ -94,7 +90,7 @@ const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID || '';
     meta('consent', 'grant');
   }
 
-  function apply(choice: ConsentChoice): void {
+  function apply(choice) {
     gtag('consent', 'update', {
       analytics_storage: choice.analytics ? 'granted' : 'denied',
       ad_storage: choice.marketing ? 'granted' : 'denied',
@@ -103,23 +99,22 @@ const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID || '';
     });
     if (choice.analytics) loadAnalytics(); else deleteAnalyticsCookies();
     if (choice.marketing) loadMeta(); else window.fbq?.('consent', 'revoke');
-    document.dispatchEvent(new CustomEvent<ConsentChoice>('privacy-consent', { detail: choice }));
+    document.dispatchEvent(new CustomEvent('privacy-consent', { detail: choice }));
   }
 
-  function readChoice(): ConsentChoice | null {
+  function readChoice() {
     try {
-      const parsed: unknown = JSON.parse(localStorage.getItem(key) || 'null');
+      const parsed = JSON.parse(localStorage.getItem(key) || 'null');
       if (!parsed || typeof parsed !== 'object') return null;
-      const choice = parsed as Partial<ConsentChoice>;
-      return typeof choice.analytics === 'boolean' && typeof choice.marketing === 'boolean'
-        ? { analytics: choice.analytics, marketing: choice.marketing }
+      return typeof parsed.analytics === 'boolean' && typeof parsed.marketing === 'boolean'
+        ? { analytics: parsed.analytics, marketing: parsed.marketing }
         : null;
     } catch {
       return null;
     }
   }
 
-  function setBackgroundInactive(inactive: boolean): void {
+  function setBackgroundInactive(inactive) {
     const background = Array.from(document.body.children).filter((element) => element !== backdrop);
     if (inactive) {
       for (const element of background) {
@@ -141,14 +136,14 @@ const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID || '';
     backgroundStates.clear();
   }
 
-  function focusableElements(): HTMLElement[] {
+  function focusableElements() {
     if (!banner) return [];
     return Array.from(
-      banner.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'),
+      banner.querySelectorAll('button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'),
     ).filter((element) => !element.hasAttribute('hidden'));
   }
 
-  function openBanner(trigger: EventTarget | null): void {
+  function openBanner(trigger) {
     returnFocus = trigger instanceof HTMLElement
       ? trigger
       : document.activeElement instanceof HTMLElement
@@ -163,14 +158,14 @@ const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID || '';
     requestAnimationFrame(() => title?.focus());
   }
 
-  function closeBanner(): void {
+  function closeBanner() {
     backdrop?.setAttribute('hidden', '');
     document.body.classList.remove('cookie-modal-open');
     setBackgroundInactive(false);
     if (returnFocus?.isConnected) returnFocus.focus();
   }
 
-  function save(choice: ConsentChoice): void {
+  function save(choice) {
     localStorage.setItem(key, JSON.stringify({ ...choice, savedAt: new Date().toISOString() }));
     apply(choice);
     closeBanner();
@@ -183,7 +178,7 @@ const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID || '';
   document.querySelector('[data-cookie-reject]')?.addEventListener('click', () => save({ analytics: false, marketing: false }));
   document.querySelectorAll('[data-cookie-settings]').forEach((button) => button.addEventListener('click', () => openBanner(button)));
 
-  banner?.addEventListener('keydown', (event: KeyboardEvent) => {
+  banner?.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && readChoice()) {
       event.preventDefault();
       closeBanner();
@@ -207,7 +202,7 @@ const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID || '';
     }
   });
 
-  backdrop?.addEventListener('click', (event: MouseEvent) => {
+  backdrop?.addEventListener('click', (event) => {
     if (event.target === backdrop && readChoice()) closeBanner();
   });
 
